@@ -1,0 +1,55 @@
+<ion-view title="Groups">
+	<ion-nav-buttons side="right">
+		<button class="button button-icon" ng-click="new()">
+		  <i class="icon ion-person-stalker"></i>
+		</button>
+	</ion-nav-buttons>
+    <ion-content padding="'false'" style="background: url(img/snowman.jpg) no-repeat center;" class="has-header">
+        <ion-list>
+		 
+		    <ion-item href="#/group/details">
+    	        <ion-option-button class="button-assertive" ng-click="removeGroup()">
+		          <i class="ion-minus-circled"></i>
+		      	</ion-option-button>
+		      <h2>Colleagues</h2>
+		      <p>15 members</p>
+		    </ion-item>
+
+		    <ion-item href="#/group/details">
+    	        <ion-option-button class="button-assertive" ng-click="removeGroup()">
+		          <i class="ion-minus-circled"></i>
+		      	</ion-option-button>
+		      <h2>Friends</h2>
+		      <p>10 members</p>
+		    </ion-item>
+		</ion-list>
+
+    </ion-content>
+</ion-view>
+
+<!-- Pop up modal to create new quote -->
+<script id="new_group.html" type="text/ng-template">
+  <div class="modal">
+
+    <div class="card">
+      <ion-header-bar class="bar-balanced">
+        <h1 class="title">New Group</h1>
+        <button class="button button-clear button-positive" ng-click="close()">Cancel</button>
+      </ion-header-bar>
+
+      <ion-content>
+        <div>
+          <div class="list">
+            <label class="item item-input">
+              <input type="text" placeholder="Enter group name" ng-model="group.name">
+            </label>
+          </div>
+          <div class="padding">
+            <button type="submit" class="button button-block button-balanced" ng-click="save(group)">Save</button>
+          </div>
+        </div>
+      </ion-content>
+    </div>
+  </div>
+
+</script>
