@@ -1,16 +1,24 @@
 angular.module('app.controllers', [])
   
-.controller('loginCtrl', function($scope) {
+.controller('loginController', function($scope) {
+
+	$scope.login = function() {
+		alert("login");
+	};
 
 })
    
-.controller('signUpCtrl', function($scope) {
+.controller('signupController', function($scope) {
+
+	$scope.signup = function() {
+		alert("signup");
+	};
 
 })
    
-.controller('groupsCtrl', function($scope, $ionicModal) {
+.controller('groupListController', function($scope, $ionicModal) {
 
-	$ionicModal.fromTemplateUrl('new_group.html', function(modal) {
+	$ionicModal.fromTemplateUrl('create_group.html', function(modal) {
 	    $scope.modal = modal;
 	}, {
 		scope: $scope
@@ -22,28 +30,26 @@ angular.module('app.controllers', [])
 	$scope.close  = function() { 
 		$scope.modal.hide(); 
 	};
-	$scope.save   = function() {
+	$scope.save   = function(group) {
 		// save the group and close the modal;
+		alert("Saving " + group.name);
 		$scope.close();
 	};
 
-	$scope.removeGroup = function(index) {
+	$scope.delete = function(index) {
 	// remove groups
 		alert("remove group");
 		$scope.refresh();
-    }
+    };
 
     $scope.refresh = function() {
     	// refresh the groups by retrieving from db
-    }
+    };
 
 })
    
-.controller('itemsCtrl', function($scope) {
+.controller('groupController', function($scope) {
 
 })
-   
-.controller('newGroupCtrl', function($scope) {
 
-})
  
