@@ -21,13 +21,16 @@ angular.module('app.routes', [])
       templateUrl: 'templates/grouplist.html',
       controller: 'groupListController'
     })
-        
+
     .state('group', {
-      url: '/grouplist/group_id',
-      templateUrl: 'templates/group.html',
-      controller: 'itemsCtrl'
+        url: '/grouplist/:grp_key',
+        templateUrl: 'templates/group.html',
+        controller: 'groupController',
+        params: {
+          grp_key: null
+        }   
     })
-        
+
     ;
 
   // if none of the above states are matched, use this as the fallback
