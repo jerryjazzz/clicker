@@ -127,7 +127,14 @@ angular.module('app.controllers', [])
 				//To insert the newly generated unique key to the group entity
 				newGroupRef = fb.child("groups").child(newGroupKey);
 					newGroupRef.update({
-					group_key: newGroupKey
+					group_key: newGroupKey,
+					group_member_count: 1
+				});
+
+				//To insert group admin as member
+				newGroupRef = fb.child("groups").child(newGroupKey).child("group_member");
+				newGroupRef.push({
+					email: user_email
 				});
 
 				$scope.refresh();
@@ -165,7 +172,7 @@ angular.module('app.controllers', [])
 			});	    	
 	    }
 	    else {
-	    	alert("Opps only admin can delete group");
+	    	$scope.showAlert();
 	    }
 		
     };
@@ -216,10 +223,72 @@ angular.module('app.controllers', [])
 		$scope.modal.hide(); 
 	};
 
+	    // An alert dialog - Saved Sucessfully
+    $scope.showAlert = function() {
+     var alertPopup = $ionicPopup.alert({
+       title: 'Clicker',
+       template: 'Opps only admin can delete group!'
+     });
+     /*alertPopup.then(function(res) {
+       console.log('Saved Successfully');
+     });*/
+    };
+    //End
 })
    
-.controller('groupController', function($scope, $stateParams, $ionicModal) {
+.controller('groupController', function($scope, $stateParams, $ionicModal, $timeout) {
+	var group_key = $stateParams.grp_key;
 
+	$scope.$on('$ionicView.enter', function(){
+		allGroupItemsRef = fb.child("groups").child(group_key).child("group_item");
+		allGroupItemsRef.on("value", function(snapshot) {
+			$scope.listOfAllGroupItems = snapshot.val();
+		}, function (errorObject) {
+			console.log("The read failed: " + errorObject.code);
+		});
+	});
+
+    $scope.refresh = function() {
+    	// refresh the groups by retrieving from db
+	    $timeout( function() {
+	      allGroupItemsRef = fb.child("groups").child(group_key).child("group_item");
+	      allGroupItemsRef.on("value", function(snapshot) {
+	        	$scope.listOfAllGroupItems = snapshot.val();
+				$scope.$broadcast('scroll.refreshComplete');
+	        }, function (errorObject) {
+	        console.log("The read failed: " + errorObject.code);
+	      });
+	    }, 500);
+    };
+
+	$scope.save = function(item) {
+		if(item) {
+			if(item.name) {
+				//To save the new item
+				groupRef = fb.child("groups").child(group_key).child("group_item");
+				
+				groupRef = groupRef.push({
+					name: item.name,
+					votes: 0
+				});
+
+				//Get the unique key created by push method
+				var newGroupItemKey = groupRef.key();
+				
+				//To insert the newly generated unique key to the group entity
+				groupRef = fb.child("groups").child(group_key).child("group_item").child(newGroupItemKey);
+				groupRef.update({
+					group_item_key: newGroupItemKey
+				});
+
+				$scope.close();
+			}
+		}
+	}
+
+	$scope.vote = function(grpItem_key) {
+		alert(grpItem_key);
+	}
 
 	$ionicModal.fromTemplateUrl('create_item.html', function(modal) {
 	    $scope.modal = modal;
@@ -235,9 +304,7 @@ angular.module('app.controllers', [])
 		$scope.modal.hide(); 
 	};
 
-	$scope.save = function() {
-		
-	}
+
 
 })
 

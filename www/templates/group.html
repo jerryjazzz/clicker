@@ -1,39 +1,15 @@
 <ion-view title="{{group.group_name}}">
     <ion-content padding="'false'" style="background: url(img/snowman.jpg) no-repeat center;" class="has-header">
-        <ion-list>
+        <ion-refresher spinner="ripple" on-refresh="refresh()">       
+        </ion-refresher>
+        <ion-list ng-repeat="groupItem in listOfAllGroupItems">
         	<ion-item>
-				<ion-option-button class="button-stable" ng-click="vote()">
+				    <ion-option-button class="button-stable" ng-click="vote(groupItem.group_item_key)">
             	<i class="ion-thumbsup balanced" style="font-size:25px"></i>
           		</ion-option-button>
-          		Bow Tie
-	        	<span class="badge badge-assertive">4</span>
+          		<p ng-bind="groupItem.name"></p>
+	        	<span class="badge badge-assertive" ng-bind="groupItem.votes"></span>
 	        </ion-item>
-		 
-<!-- 		<ion-item>
-				Bow tie
-				<span class="badge badge-assertive">4</span>
-			</ion-item>
-
-			<ion-item>
-				Chocolate
-				<span class="badge badge-assertive">1</span>
-			</ion-item>
-
-			<ion-item>
-				Water bottle
-				<span class="badge badge-assertive">3</span>
-			</ion-item>
-
-			<ion-item>
-				Big-screen monitor
-				<span class="badge badge-assertive">1</span>
-			</ion-item>
-
-			<ion-item>
-				Guitar
-				<span class="badge badge-assertive">1</span>
-			</ion-item> -->
-
 		</ion-list>
         <button class="button button-balanced button-block " ng-click="new()">New Item</button>
         <button class="button button-positive button-block " >Invite Friends</button>
