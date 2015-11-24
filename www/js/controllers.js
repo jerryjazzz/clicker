@@ -218,7 +218,26 @@ angular.module('app.controllers', [])
 
 })
    
-.controller('groupController', function($scope, $stateParams) {
+.controller('groupController', function($scope, $stateParams, $ionicModal) {
+
+
+	$ionicModal.fromTemplateUrl('create_item.html', function(modal) {
+	    $scope.modal = modal;
+	}, {
+		scope: $scope
+	});
+
+    $scope.new    = function() { 
+     	$scope.modal.show(); 
+    };
+
+	$scope.close  = function() { 
+		$scope.modal.hide(); 
+	};
+
+	$scope.save = function() {
+		
+	}
 
 })
 

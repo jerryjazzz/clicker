@@ -1,9 +1,9 @@
-<ion-view title="Items">
+<ion-view title="{{group.group_name}}">
     <ion-content padding="'false'" style="background: url(img/snowman.jpg) no-repeat center;" class="has-header">
         <ion-list>
         	<ion-item>
-				<ion-option-button class="button-assertive" ng-click="vote()">
-            	<i class="ion-thumbsup"></i>
+				<ion-option-button class="button-stable" ng-click="vote()">
+            	<i class="ion-thumbsup balanced" style="font-size:25px"></i>
           		</ion-option-button>
           		Bow Tie
 	        	<span class="badge badge-assertive">4</span>
@@ -35,7 +35,34 @@
 			</ion-item> -->
 
 		</ion-list>
-        <button class="button button-balanced button-block ">New Item</button>
-        <button class="button button-positive button-block ">Invite Friends</button>
+        <button class="button button-balanced button-block " ng-click="new()">New Item</button>
+        <button class="button button-positive button-block " >Invite Friends</button>
     </ion-content>
 </ion-view>
+
+<!-- Pop up modal to create new quote -->
+<script id="create_item.html" type="text/ng-template">
+  <div class="modal">
+
+    <div class="card">
+      <ion-header-bar class="bar-balanced">
+        <h1 class="title">New Item</h1>
+        <button class="button button-clear button-positive" ng-click="close()">Cancel</button>
+      </ion-header-bar>
+
+      <ion-content>
+        <div>
+          <div class="list">
+            <label class="item item-input">
+              <input type="text" placeholder="Enter your wish gift" ng-model="item.name">
+            </label>
+          </div>
+          <div class="padding">
+            <button type="submit" class="button button-block button-balanced" ng-click="save(item)">Save</button>
+          </div>
+        </div>
+      </ion-content>
+    </div>
+  </div>
+
+</script>
