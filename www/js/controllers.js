@@ -287,6 +287,7 @@ angular.module('app.controllers', [])
 	}
 
 	$scope.vote = function(grpItem_key) {
+		$scope.liked = !$scope.liked;
 		alert(grpItem_key);
 	}
 

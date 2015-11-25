@@ -4,8 +4,8 @@
         </ion-refresher>
         <ion-list ng-repeat="groupItem in listOfAllGroupItems">
         	<ion-item>
-				    <ion-option-button class="button-stable" ng-click="vote(groupItem.group_item_key)">
-            	<i class="ion-thumbsup balanced" style="font-size:25px"></i>
+				    <ion-option-button class="button-positive" ng-click="vote(groupItem.group_item_key)"> 
+            	<i ng-class="{'icon ion-ios7-heart': liked, 'icon ion-ios7-heart-outline': !liked}" style="font-size:25px"></i>
           		</ion-option-button>
           		<p ng-bind="groupItem.name"></p>
 	        	<span class="badge badge-assertive" ng-bind="groupItem.votes"></span>
