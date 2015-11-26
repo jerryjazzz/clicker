@@ -3,12 +3,10 @@
         <ion-refresher spinner="ripple" on-refresh="refresh()">       
         </ion-refresher>
         <ion-list ng-repeat="groupItem in listOfAllGroupItems">
-        	<ion-item>
-				    <ion-option-button class="button-positive" ng-click="vote(groupItem.group_item_key)"> 
-            	<i ng-class="{'icon ion-ios7-heart': liked, 'icon ion-ios7-heart-outline': !liked}" style="font-size:25px"></i>
-          		</ion-option-button>
-          		<p ng-bind="groupItem.name"></p>
-	        	<span class="badge badge-assertive" ng-bind="groupItem.votes"></span>
+        	<ion-item class="item-icon-left item-icon-right" ng-click="vote(groupItem.group_item_key)">
+            <i ng-class="liked ? 'icon ion-ios-heart assertive' : 'icon ion-ios-heart-outline'"></i>
+            <p ng-bind="groupItem.name"></p>
+            <span class="badge badge-balanced" ng-bind="groupItem.votes"></span>
 	        </ion-item>
 		</ion-list>
         <button class="button button-balanced button-block " ng-click="new()">New Item</button>

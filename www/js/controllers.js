@@ -239,6 +239,8 @@ angular.module('app.controllers', [])
 .controller('groupController', function($scope, $stateParams, $ionicModal, $timeout) {
 	var group_key = $stateParams.grp_key;
 
+	$scope.liked = false;
+
 	$scope.$on('$ionicView.enter', function(){
 		allGroupItemsRef = fb.child("groups").child(group_key).child("group_item");
 		allGroupItemsRef.on("value", function(snapshot) {
