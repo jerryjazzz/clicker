@@ -236,31 +236,107 @@ angular.module('app.controllers', [])
     //End
 })
    
-.controller('groupController', function($scope, $stateParams, $ionicModal, $timeout) {
+.controller('groupController', function($scope, $stateParams, $ionicModal, $timeout, Users) {
+	var user_email = Users.getEmail();
 	var group_key = $stateParams.grp_key;
-
+	
 	$scope.liked = false;
 
 	$scope.$on('$ionicView.enter', function(){
-		allGroupItemsRef = fb.child("groups").child(group_key).child("group_item");
+		/*allGroupItemsRef = fb.child("groups").child(group_key).child("group_item");
 		allGroupItemsRef.on("value", function(snapshot) {
 			$scope.listOfAllGroupItems = snapshot.val();
+			console.log(snapshot.val());
 		}, function (errorObject) {
 			console.log("The read failed: " + errorObject.code);
-		});
+		});*/
+
+		$scope.refreshWithoutTimeout();
 	});
 
     $scope.refresh = function() {
+
     	// refresh the groups by retrieving from db
 	    $timeout( function() {
-	      allGroupItemsRef = fb.child("groups").child(group_key).child("group_item");
-	      allGroupItemsRef.on("value", function(snapshot) {
-	        	$scope.listOfAllGroupItems = snapshot.val();
-				$scope.$broadcast('scroll.refreshComplete');
+			allGroupItemsRef = fb.child("groups").child(group_key).child("group_item");
+			allGroupItemsRef.on("value", function(snapshot) {
+				$scope.listOfAllGroupItems = [];
+				snapshot.forEach(function(childSnapShot) {
+					var groupItem = childSnapShot.val();
+
+					var checkDupGroupItem = false;
+
+					for(var i=0; i<$scope.listOfAllGroupItems.length; i++) {
+						if(groupItem.group_item_key == $scope.listOfAllGroupItems[i].group_item_key)
+							checkDupGroupItem = true;
+					}
+
+					if(!checkDupGroupItem) {
+						groupItem.voted = false;
+
+						angular.forEach(groupItem.voters, function(voter, key) {
+						  if(user_email == voter.email) {
+						  	groupItem.voted = true;
+						  }
+						});
+
+						$scope.listOfAllGroupItems.push(groupItem);
+					}
+
+					//Stop the ion-refresher from spinning
+					$scope.$broadcast('scroll.refreshComplete');
+				});
+
+
+        	//$scope.listOfAllGroupItems = snapshot.val();
+			//$scope.$broadcast('scroll.refreshComplete');
+
 	        }, function (errorObject) {
 	        console.log("The read failed: " + errorObject.code);
 	      });
 	    }, 500);
+    };
+
+    $scope.refreshWithoutTimeout = function() {
+    	// refresh the groups by retrieving from db
+		allGroupItemsRef = fb.child("groups").child(group_key).child("group_item");
+		allGroupItemsRef.on("value", function(snapshot) {
+			$scope.listOfAllGroupItems = [];
+			snapshot.forEach(function(childSnapShot) {
+				var groupItem = childSnapShot.val();
+
+				var checkDupGroupItem = false;
+
+				for(var i=0; i<$scope.listOfAllGroupItems.length; i++) {
+					if(groupItem.group_item_key == $scope.listOfAllGroupItems[i].group_item_key)
+						checkDupGroupItem = true;
+				}
+
+				if(!checkDupGroupItem) {
+					//Hard code voted to false at first
+					//This voted property is not saved in Firebase and it will be populated differently for each user
+					groupItem.voted = false;
+
+					angular.forEach(groupItem.voters, function(voter, key) {
+					  if(user_email == voter.email) {
+					  	groupItem.voted = true;
+					  }
+					});
+
+					$scope.listOfAllGroupItems.push(groupItem);
+				}
+
+				//Stop the ion-refresher from spinning
+				$scope.$broadcast('scroll.refreshComplete');
+			});
+
+
+    	//$scope.listOfAllGroupItems = snapshot.val();
+		//$scope.$broadcast('scroll.refreshComplete');
+
+        }, function (errorObject) {
+        console.log("The read failed: " + errorObject.code);
+      });
     };
 
 	$scope.save = function(item) {
@@ -289,8 +365,47 @@ angular.module('app.controllers', [])
 	}
 
 	$scope.vote = function(grpItem_key) {
-		$scope.liked = !$scope.liked;
-		alert(grpItem_key);
+		var groupItemRef = fb.child("groups").child(group_key).child("group_item").child(grpItem_key);
+
+		for(var i=0; i<$scope.listOfAllGroupItems.length; i++) {
+			if($scope.listOfAllGroupItems[i].group_item_key == grpItem_key) {
+				//If user has already voted
+				if($scope.listOfAllGroupItems[i].voted) {
+					//To deduct the vote by 1 locally if the user has already voted
+					$scope.listOfAllGroupItems[i].votes = $scope.listOfAllGroupItems[i].votes - 1;
+
+					//Update the new vote to the Firebase
+					groupItemRef.update({
+						votes: $scope.listOfAllGroupItems[i].votes
+					});
+
+					//If the user has already voted, it will be removed from the firebase
+					angular.forEach($scope.listOfAllGroupItems[i].voters, function(voter, key) {
+					  if(user_email == voter.email) {
+  							groupItemRef = fb.child("groups").child(group_key).child("group_item").child(grpItem_key).child("voters").child(key);
+							groupItemRef.remove();
+					  }
+					});
+				}
+				else {
+					//Increase the votes of the selected item by 1 locally
+					$scope.listOfAllGroupItems[i].votes = $scope.listOfAllGroupItems[i].votes + 1;
+					//Update the votes to Firebase
+					groupItemRef.update({
+						votes: $scope.listOfAllGroupItems[i].votes
+					});
+
+					//Insert the voter's email for that particular item
+					groupItemRef = fb.child("groups").child(group_key).child("group_item").child(grpItem_key).child("voters");
+					groupItemRef.push({'email': user_email});
+				}
+
+
+				$scope.refreshWithoutTimeout();
+
+				break;
+			}
+		}
 	}
 
 	$ionicModal.fromTemplateUrl('create_item.html', function(modal) {
