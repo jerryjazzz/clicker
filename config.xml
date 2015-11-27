@@ -5,7 +5,9 @@
         An Ionic Framework and Cordova project.
   </description>
   <author email="chin.sem.chang@gmail.com" href="http://tomatohoneys.com/">
-      Tomato Honeys
+    Chin Sem Chang
+    Jack Tiong
+    Vincent Chong
   </author>
   <content src="index.html"/>
   <access origin="*"/>
@@ -19,8 +21,8 @@
   <feature name="StatusBar">
     <param name="ios-package" value="CDVStatusBar" onload="true"/>
   </feature>
-  <allow-intent href="*.firebaseio.com" />
-  <allow-intent href="auth.firebase.com" />
+  <allow-intent href="*.firebaseio.com"/>
+  <allow-intent href="auth.firebase.com"/>
   <platform name="android">
     <icon src="resources/android/icon/drawable-ldpi-icon.png" density="ldpi"/>
     <icon src="resources/android/icon/drawable-mdpi-icon.png" density="mdpi"/>
@@ -41,4 +43,5 @@
     <splash src="resources/android/splash/drawable-port-xxhdpi-screen.png" density="port-xxhdpi"/>
     <splash src="resources/android/splash/drawable-port-xxxhdpi-screen.png" density="port-xxxhdpi"/>
   </platform>
+  <icon src="resources/android/icon/drawable-xhdpi-icon.png"/>
 </widget>
