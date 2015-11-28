@@ -1,7 +1,6 @@
 angular.module('app.controllers', [])
   
 .controller('loginController', function($scope, $rootScope, $state, Popup, Users) {
-
 	$scope.login = function(userData) {
 	    $rootScope.show('Loading...');
 
@@ -33,6 +32,40 @@ angular.module('app.controllers', [])
 	      }
 	    });
 	    //End
+	};
+
+	//User login via facebook
+	$scope.loginWithFacebook = function() {
+		$rootScope.show('Loading...');
+		fb.authWithOAuthPopup("facebook", function(error, authData) {
+		  if (error) {
+		    $rootScope.hide();
+		    console.log("Login Failed!", error);
+		  } else {
+		    console.log("Authenticated successfully with payload:", authData);
+		    //console.log(authData.facebook.accessToken);
+		    var fb_accToken = authData.facebook.accessToken;
+
+		    // Get data via facebook graph API
+		    $http.get('https://graph.facebook.com/'+ authData.facebook.id +'/friends?fields=id,name,birthday&access_token='+fb_accToken).
+		    then(function(data) {
+		      //console.log(data.data.data[0].name);
+
+		      //Insert user profile into Firebase
+		      Users.newUser(authData.uid, authData.facebook.displayName, authData.facebook.email);
+		    }), (function(data) {
+		      console.log("Data Failed: " + data);
+		    });
+		    //End
+		    
+		    //To save the user's email in the factory which will later be used for group filtering
+		    Users.setEmail(authData.facebook.email);
+		    $rootScope.hide();
+		    $state.go("grouplist");
+		  }
+		}, {
+		  scope: "email,user_likes,user_friends"
+		});
 	};
 
 })
