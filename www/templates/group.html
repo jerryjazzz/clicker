@@ -1,6 +1,6 @@
 <ion-view title="{{group.group_name}}">
     <ion-content padding="'false'" style="background: url(img/snowman.jpg) no-repeat center;" class="has-header">
-        <ion-refresher spinner="ripple" on-refresh="refresh()">       
+        <ion-refresher spinner="ripple" on-refresh="refresh()">
         </ion-refresher>
         <ion-list ng-repeat="groupItem in listOfAllGroupItems">
         	<ion-item class="item-icon-left item-icon-right" ng-click="vote(groupItem.group_item_key)">
@@ -9,8 +9,9 @@
             <span class="badge badge-balanced" ng-bind="groupItem.votes"></span>
 	        </ion-item>
 		</ion-list>
-        <button class="button button-balanced button-block " ng-click="new()">New Item</button>
+        <button class="button button-balanced button-block " ng-click="openModal(1)">New Item</button>
         <button class="button button-positive button-block " >Invite Friends</button>
+        <button class="button button-energized button-block " ng-click="openModal(2)">Group Info</button>
     </ion-content>
 </ion-view>
 
@@ -21,7 +22,7 @@
     <div class="card">
       <ion-header-bar class="bar-balanced">
         <h1 class="title">New Item</h1>
-        <button class="button button-clear button-positive" ng-click="close()">Cancel</button>
+        <button class="button button-clear button-positive" ng-click="closeModal(1)">Cancel</button>
       </ion-header-bar>
 
       <ion-content>
@@ -38,5 +39,26 @@
       </ion-content>
     </div>
   </div>
+</script>
+<script id="group_info.html" type="text/ng-template">
+    <div class="modal">
+
+      <div class="card">
+        <ion-header-bar class="bar-balanced">
+          <h1 class="title">{{group.group_name}}</h1>
+          <button class="button button-clear button-positive" ng-click="closeModal(2)">Cancel</button>
+        </ion-header-bar>
+
+        <ion-content>
+          <div class="row responsive-sm">
+            <div class="col"></div>
+            <div class="col text-center">
+              <qrcode version="4" error-correction-level="M" size="150" data="{{group_key2}}"></qrcode>
+            </div>
+            <div class="col"></div>
+        </ion-content>
+      </div>
+    </div>
+
 
 </script>

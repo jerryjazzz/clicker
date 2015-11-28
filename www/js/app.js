@@ -2,7 +2,7 @@
 // Jack's FB environment
 var fb = new Firebase("https://clickerprj.firebaseio.com/");
 
-angular.module('app', ['ionic', 'app.controllers', 'app.services', 'firebase'])
+angular.module('app', ['ionic', 'app.controllers', 'app.services', 'firebase','monospaced.qrcode'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -39,7 +39,7 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'firebase'])
         controller: 'groupController',
         params: {
           grp_key: null
-        }   
+        }
     });
 
   // if none of the above states are matched, use this as the fallback

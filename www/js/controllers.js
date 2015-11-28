@@ -1,5 +1,5 @@
 angular.module('app.controllers', [])
-  
+
 .controller('loginController', function($scope, $rootScope, $state, $http, Popup, Users) {
 	$scope.login = function(userData) {
 	    $rootScope.show('Loading...');
@@ -12,7 +12,7 @@ angular.module('app.controllers', [])
 	    if(!userData.email || !userData.password) {
 			$rootScope.notify("Please enter all the credentials");
 			$rootScope.hide();
-			return false;	    	
+			return false;
 	    }
 
 	    //Log user into the system
@@ -57,7 +57,7 @@ angular.module('app.controllers', [])
 		      console.log("Data Failed: " + data);
 		    });
 		    //End
-		    
+
 		    //To save the user's email in the factory which will later be used for group filtering
 		    Users.setEmail(authData.facebook.email);
 		    $rootScope.hide();
@@ -69,11 +69,11 @@ angular.module('app.controllers', [])
 	};
 
 })
-   
+
 .controller('signupController', function($scope, $rootScope, $state, Popup, Users) {
 
 	$scope.signup = function(userData) {
-	    
+
 	    $rootScope.show('Loading...');
 
 	    if(!userData) {
@@ -127,7 +127,7 @@ angular.module('app.controllers', [])
 	};
 
 })
-   
+
 .controller('groupListController', function($scope, $ionicModal, Users, $timeout, $ionicPopup) {
 	$scope.$on('$ionicView.enter', function(){
 		$scope.refresh();
@@ -186,7 +186,7 @@ angular.module('app.controllers', [])
 	          isGroupAdmin = true;
 	          break;
 	        }
-	        
+
 	      }
 	    }
 
@@ -202,12 +202,12 @@ angular.module('app.controllers', [])
 					groupRef.remove();
 					$scope.refresh();
 				}
-			});	    	
+			});
 	    }
 	    else {
 	    	$scope.showAlert();
 	    }
-		
+
     };
 
     $scope.refresh = function() {
@@ -248,12 +248,12 @@ angular.module('app.controllers', [])
 		scope: $scope
 	});
 
-    $scope.new    = function() { 
-     	$scope.modal.show(); 
+    $scope.new    = function() {
+     	$scope.modal.show();
     };
 
-	$scope.close  = function() { 
-		$scope.modal.hide(); 
+	$scope.close  = function() {
+		$scope.modal.hide();
 	};
 
 	    // An alert dialog - Saved Sucessfully
@@ -268,11 +268,13 @@ angular.module('app.controllers', [])
     };
     //End
 })
-   
+
 .controller('groupController', function($scope, $stateParams, $ionicModal, $timeout, Users) {
 	var user_email = Users.getEmail();
 	var group_key = $stateParams.grp_key;
-	
+
+  $scope.group_key2 = $stateParams.grp_key; // for barcode encode purpose
+
 	$scope.liked = false;
 
 	$scope.$on('$ionicView.enter', function(){
@@ -377,7 +379,7 @@ angular.module('app.controllers', [])
 			if(item.name) {
 				//To save the new item
 				groupRef = fb.child("groups").child(group_key).child("group_item");
-				
+
 				groupRef = groupRef.push({
 					name: item.name,
 					votes: 0
@@ -385,7 +387,7 @@ angular.module('app.controllers', [])
 
 				//Get the unique key created by push method
 				var newGroupItemKey = groupRef.key();
-				
+
 				//To insert the newly generated unique key to the group entity
 				groupRef = fb.child("groups").child(group_key).child("group_item").child(newGroupItemKey);
 				groupRef.update({
@@ -442,21 +444,50 @@ angular.module('app.controllers', [])
 	}
 
 	$ionicModal.fromTemplateUrl('create_item.html', function(modal) {
-	    $scope.modal = modal;
+	    $scope.itemModal = modal;
 	}, {
 		scope: $scope
 	});
 
-    $scope.new    = function() { 
-     	$scope.modal.show(); 
-    };
+  // $scope.new    = function() {
+  //    	$scope.modal.show();
+  //   };
+  //
+	// $scope.close  = function() {
+	// 	$scope.modal.hide();
+	// };
 
-	$scope.close  = function() { 
-		$scope.modal.hide(); 
-	};
+  // show group info
+  $ionicModal.fromTemplateUrl('group_info.html', function(modal) {
+	    $scope.groupInfoModal = modal;
+	}, {
+		  scope: $scope
+	});
+
+  // handle modal for both create new item and group info
+  $scope.openModal = function(index){
+      if(index == 1){
+          $scope.itemModal.show();
+      }
+      else {
+          alert($stateParams.grp_key);
+          $scope.groupInfoModal.show();
+      }
+  }
+
+  $scope.closeModal = function(index){
+    if(index == 1){
+        $scope.itemModal.hide();
+    }
+    else {
+        $scope.groupInfoModal.hide();
+    }
+  }
 
 
 
 })
 
- 
+// QR Code Encoding
+
+ // QR Code Decoding
