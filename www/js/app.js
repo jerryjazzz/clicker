@@ -2,7 +2,7 @@
 // Jack's FB environment
 var fb = new Firebase("https://clickerprj.firebaseio.com/");
 
-angular.module('app', ['ionic', 'app.controllers', 'app.services', 'firebase','monospaced.qrcode'])
+angular.module('app', ['ionic', 'app.controllers', 'app.services', 'firebase','monospaced.qrcode','ngCordova'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {

@@ -273,7 +273,13 @@ angular.module('app.controllers', [])
 	var user_email = Users.getEmail();
 	var group_key = $stateParams.grp_key;
 
-  $scope.group_key2 = $stateParams.grp_key; // for barcode encode purpose
+	var curGroupRef = fb.child("groups").child(group_key);
+
+	curGroupRef.on("value", function(snapshot) {
+	  $scope.curGroup = snapshot.val();
+	}, function (errorObject) {
+	  console.log("The read failed: " + errorObject.code);
+	});
 
 	$scope.liked = false;
 
@@ -470,7 +476,6 @@ angular.module('app.controllers', [])
           $scope.itemModal.show();
       }
       else {
-          alert($stateParams.grp_key);
           $scope.groupInfoModal.show();
       }
   }
