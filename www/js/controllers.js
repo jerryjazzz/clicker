@@ -1,6 +1,6 @@
 angular.module('app.controllers', [])
   
-.controller('loginController', function($scope, $rootScope, $state, Popup, Users) {
+.controller('loginController', function($scope, $rootScope, $state, $http, Popup, Users) {
 	$scope.login = function(userData) {
 	    $rootScope.show('Loading...');
 
