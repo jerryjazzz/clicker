@@ -35,6 +35,13 @@ angular.module('app.services', [])
         "email": email
       });
     },
+    setUserKey: function(user_key) {
+      window.localStorage.setItem("user_key", JSON.stringify(user_key));
+    },
+    getUserKey: function() {
+      var user_key = window.localStorage.getItem("user_key");
+      return JSON.parse(user_key);
+    },
     get: function(chatId) {
       for (var i = 0; i < chats.length; i++) {
         if (chats[i].id === parseInt(chatId)) {

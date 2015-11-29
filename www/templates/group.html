@@ -1,4 +1,4 @@
-<ion-view title="{{curGroup.group_name}}">
+<ion-view title="{{group_name}}">
     <ion-content padding="'false'" style="background: url(img/snowman.jpg) no-repeat center;" class="has-header">
         <ion-refresher spinner="ripple" on-refresh="refresh()">
         </ion-refresher>
@@ -10,7 +10,7 @@
 	        </ion-item>
 		</ion-list>
         <button class="button button-balanced button-block " ng-click="openModal(1)">New Item</button>
-        <button class="button button-positive button-block " >Invite Friends</button>
+        <button class="button button-positive button-block " ng-click="invite()" >Invite Friends</button>
         <button class="button button-energized button-block " ng-click="openModal(2)">Group Info</button>
     </ion-content>
 </ion-view>

@@ -28,6 +28,9 @@ angular.module('app.controllers', [])
 	        console.log("Authenticated successfully with payload:", authData);
 	        //To save the user's email in the factory which will later be used for group filtering
 	        Users.setEmail(userData.email);
+	        //Save Firebase user key
+	        Users.setUserKey(authData.uid);
+
 	        $state.go("grouplist");
 	      }
 	    });
@@ -60,6 +63,9 @@ angular.module('app.controllers', [])
 
 		    //To save the user's email in the factory which will later be used for group filtering
 		    Users.setEmail(authData.facebook.email);
+		    //Save Firebase user key
+	        Users.setUserKey(authData.uid);
+
 		    $rootScope.hide();
 		    $state.go("grouplist");
 		  }
@@ -67,7 +73,6 @@ angular.module('app.controllers', [])
 		  scope: "email,user_likes,user_friends"
 		});
 	};
-
 })
 
 .controller('signupController', function($scope, $rootScope, $state, Popup, Users) {
@@ -115,6 +120,8 @@ angular.module('app.controllers', [])
 	          } else {
 	            //To save the user's email in the factory which will later be used for group filtering
 	            Users.setEmail(email);
+	      	  	//Save Firebase user key
+	      	 	Users.setUserKey(userData.uid);
 
 	            $rootScope.hide();
 	            console.log("Authenticated successfully with payload:", authData);
@@ -125,7 +132,6 @@ angular.module('app.controllers', [])
 	      }
 	    });
 	};
-
 })
 
 .controller('groupListController', function($scope, $ionicModal, Users, $timeout, $ionicPopup) {
@@ -146,6 +152,7 @@ angular.module('app.controllers', [])
 			if(group.name) {
 				//Insert the new group in the firebase
 				var user_email = Users.getEmail();
+				var user_key = Users.getUserKey();
 
 				var newGroupRef = fb.child("groups");
 				newGroupRef = newGroupRef.push({
@@ -169,6 +176,11 @@ angular.module('app.controllers', [])
 				newGroupRef.push({
 					email: user_email
 				});
+
+				//To insert the group into user's entity
+
+				var userRef = fb.child("users").child(user_key).child("group_list");
+				userRef.push({group_key: newGroupKey});
 
 				$scope.refresh();
 			}
@@ -213,33 +225,57 @@ angular.module('app.controllers', [])
     $scope.refresh = function() {
     	// refresh the groups by retrieving from db
 	    $timeout( function() {
-	      //To get a list of relevant groups to be shown in dashbaord
-	      allGroupsRef = fb.child("groups");
-	      allGroupsRef.on("value", function(snapshot) {
-	        $scope.listOfAllGroups = [];
-	        snapshot.forEach(function(childSnapShot) {
-	          var group = childSnapShot.val();
-	          var checkDupGroup = false;
+	    	var user_group_list = [];
+	    	var user_key = Users.getUserKey();
+	    	
+	    	var userRef = fb.child("users").child(user_key).child("group_list");
+	    	var allGroupsRef = fb.child("groups");
+	    	
+	    	//To get a list of groups that are relevant to the user
+	    	userRef.on("value", function(snapshot) {
+	    		snapshot.forEach(function(childSnapShot) {
+	    			var userGroup = childSnapShot.val();
+	    			user_group_list.push(userGroup.group_key);
+	    		});
 
-	          for(var i=0; i<$scope.listOfAllGroups.length; i++) {
-	            if(group.group_key == $scope.listOfAllGroups.group_key)
-	              checkDupGroup = true;
-	          }
+				//To get a list of relevant groups to be shown in dashbaord
+				allGroupsRef.on("value", function(snapshot) {
+					$scope.listOfAllGroups = [];
+					snapshot.forEach(function(childSnapShot) {
+					  var group = childSnapShot.val();
+					  var checkDupGroup = false;
+					  var chkIsUserGroup = false;
 
-	          if(!checkDupGroup) {
-	            $scope.listOfAllGroups.push(group);
-	          }
+					  //Check for duplication of group in the array
+					  for(var i=0; i<$scope.listOfAllGroups.length; i++) {
+					    if(group.group_key == $scope.listOfAllGroups.group_key)
+					      checkDupGroup = true;
+					  }
 
-	          //Copy all the groups to the local storage after refreshed
-	          window.localStorage.setItem("dash_group", JSON.stringify($scope.listOfAllGroups));
+					  if(!checkDupGroup) {
+					  	//Check the visibility of this group to the user
+					  	for(var i=0; i<user_group_list.length; i++) {
+					  		if(group.group_key == user_group_list[i]) {
+					  			chkIsUserGroup = true;
+					  		}
+					  	}
 
-	          //Stop the ion-refresher from spinning
-	          $scope.$broadcast('scroll.refreshComplete');
-	        });
-	      }, function (errorObject) {
-	        console.log("The read failed: " + errorObject.code);
-	      });
-	    }, 1000);
+					  	if(chkIsUserGroup) {
+					  		$scope.listOfAllGroups.push(group);	
+					  	}
+					  }
+					});
+			  		//Copy all the groups to the local storage after refreshed
+					window.localStorage.setItem("dash_group", JSON.stringify($scope.listOfAllGroups));
+
+					//Stop the ion-refresher from spinning
+					$scope.$broadcast('scroll.refreshComplete');
+				}, function (errorObject) {
+					console.log("The read failed: " + errorObject.code);
+				});
+
+	    	});	
+		}, 1000);
     };
 
 	$ionicModal.fromTemplateUrl('create_group.html', function(modal) {
@@ -269,34 +305,16 @@ angular.module('app.controllers', [])
     //End
 })
 
-.controller('groupController', function($scope, $stateParams, $ionicModal, $timeout, Users) {
+.controller('groupController', function($scope, $stateParams, $ionicModal, $timeout, $ionicPopup, Users) {
 	var user_email = Users.getEmail();
 	var group_key = $stateParams.grp_key;
-
-	var curGroupRef = fb.child("groups").child(group_key);
-
-	curGroupRef.on("value", function(snapshot) {
-	  $scope.curGroup = snapshot.val();
-	}, function (errorObject) {
-	  console.log("The read failed: " + errorObject.code);
-	});
-
-	$scope.liked = false;
+	$scope.group_name = $stateParams.grp_name;
 
 	$scope.$on('$ionicView.enter', function(){
-		/*allGroupItemsRef = fb.child("groups").child(group_key).child("group_item");
-		allGroupItemsRef.on("value", function(snapshot) {
-			$scope.listOfAllGroupItems = snapshot.val();
-			console.log(snapshot.val());
-		}, function (errorObject) {
-			console.log("The read failed: " + errorObject.code);
-		});*/
-
 		$scope.refreshWithoutTimeout();
 	});
 
     $scope.refresh = function() {
-
     	// refresh the groups by retrieving from db
 	    $timeout( function() {
 			allGroupItemsRef = fb.child("groups").child(group_key).child("group_item");
@@ -448,6 +466,105 @@ angular.module('app.controllers', [])
 			}
 		}
 	}
+
+	$scope.invite = function() {
+		$scope.group = {}
+
+		// An elaborate, custom popup
+		var myPopup = $ionicPopup.show({
+			template: '<input type="email" ng-model="group.new_member_email">',
+			title: 'Add Group Member',
+			subTitle: 'Please enter e-mail',
+			scope: $scope,
+			buttons: [
+				{ text: 'Cancel' },
+				{
+					text: '<b>Save</b>',
+					type: 'button-positive',
+					onTap: function(e) {
+						if (!$scope.group.new_member_email) {
+							//don't allow the user to close unless he enters wifi password
+							e.preventDefault();
+						} else {
+							return $scope.group.new_member_email;
+						}
+					}
+				}
+			]
+		});
+
+		myPopup.then(function(new_member_email) {
+			var chkValidUser = false;
+			var user_key = "";
+			var userRef = fb.child("users");
+
+			//To check if the user is a valid user to be added to the group
+			userRef.once("value", function(snapshot) {
+				if(user_email != new_member_email) {
+					snapshot.forEach(function(childSnapShot) {
+						var user = childSnapShot.val();
+
+						//Check if the user entered email is a valid email
+						if(new_member_email == user.email) {
+							user_key = childSnapShot.key();
+							chkValidUser = true;
+						}
+					});
+				}
+
+				//If user is a valid user
+				if(chkValidUser) {
+					var chk_is_member = false;
+					var group_member_count = 0;
+					var groupRef = fb.child("groups").child(group_key);
+					var groupMemberRef = fb.child("groups").child(group_key).child("group_member");
+					var userGroupRef = fb.child("users").child(user_key).child("group_list");
+
+					//Check if user has already been added to the group
+					groupMemberRef.once("value", function(snapshot) {
+						snapshot.forEach(function(childSnapShot) {
+							var member = childSnapShot.val();
+							if(new_member_email == member.email)
+								chk_is_member = true;
+						});
+						
+						//If user hasn't been added to the group
+						if(!chk_is_member) {
+							// Add the user to the group entity
+							groupRef.once("value", function(snapshot) {
+								var group = snapshot.val();
+								group_member_count = group.group_member_count;
+
+								groupRef.update({
+									group_member_count: group_member_count + 1
+								});
+
+								groupMemberRef.push({'email': new_member_email});
+
+								userGroupRef.push({'group_key': group_key});
+
+								console.log("Added Successfully");
+							});
+
+							// Include the group's key in the user entity for dashboard filtering purposes
+
+						}
+						else {
+							console.log("User has already joined this group");
+						}
+					});
+
+				}
+				else {
+					//This clause is for invalid user email / user key the email that he has logged in with
+					alert("Invalid user");
+				}
+			}, function (errorObject) {
+				console.log("The read failed: " + errorObject.code);
+			});			
+		});
+
+	};
 
 	$ionicModal.fromTemplateUrl('create_item.html', function(modal) {
 	    $scope.itemModal = modal;

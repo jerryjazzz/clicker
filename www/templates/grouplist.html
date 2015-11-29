@@ -8,7 +8,7 @@
       <ion-refresher spinner="ripple" on-refresh="refresh()">       
       </ion-refresher>
       <ion-list ng-repeat="group in listOfAllGroups">
-        <ion-item ui-sref="group({grp_key: group.group_key})">
+        <ion-item ui-sref="group({grp_key: group.group_key, grp_name: group.group_name})">
           <ion-option-button class="button-assertive" ng-click="removeGroup(group.group_key)">
               <i class="ion-minus-circled"></i>
           </ion-option-button>

@@ -34,11 +34,12 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'firebase','m
       controller: 'groupListController'
     })
     .state('group', {
-        url: '/grouplist/:grp_key',
+        url: '/grouplist',
         templateUrl: 'templates/group.html',
         controller: 'groupController',
         params: {
-          grp_key: null
+          grp_key: null,
+          grp_name: null
         }
     });
 
