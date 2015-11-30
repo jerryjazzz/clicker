@@ -22,7 +22,9 @@ angular.module('app.controllers', [])
 	    }, function(error, authData) {
 	      if (error) {
 	        $rootScope.hide();
-	        console.log("Login Failed!", error);
+	        console.log(error.code);
+	        $scope.loginErrorMessages(error);
+
 	      } else {
 	        $rootScope.hide();
 	        console.log("Authenticated successfully with payload:", authData);
@@ -44,6 +46,7 @@ angular.module('app.controllers', [])
 		  if (error) {
 		    $rootScope.hide();
 		    console.log("Login Failed!", error);
+		    $scope.loginErrorMessages(error);
 		  } else {
 		    console.log("Authenticated successfully with payload:", authData);
 		    //console.log(authData.facebook.accessToken);
@@ -72,6 +75,35 @@ angular.module('app.controllers', [])
 		}, {
 		  scope: "email,user_likes,user_friends"
 		});
+	};
+
+	$scope.loginErrorMessages = function(error) {
+		switch (error.code) {
+			case "INVALID_USER":
+				console.log("The specified user account does not exist.");
+				$rootScope.hide();
+				$rootScope.notify('Error','Email or Password is incorrect!');
+				break;
+			case "INVALID_PASSWORD":
+				console.log("The specified user account password is incorrect.");
+				$rootScope.hide();
+				$rootScope.notify('Error','Email or Password is incorrect!');
+				break;
+			case "NETWORK_ERROR":
+				console.log("Network Error.");
+				$rootScope.hide();
+				$rootScope.notify('Error','An error occurred while attempting to contact the authentication server.');
+				break;
+			case "SERVICE_UNAVAILABLE":
+				console.log("Service Unavailable.");
+				$rootScope.hide();
+				$rootScope.notify('Error','Service is not available at this moment. Please try again later.');
+				break;
+			default:
+				console.log("Error login to application:", error);
+				$rootScope.hide();
+				$rootScope.notify('Error','Opps! Something went wrong!');
+		}
 	};
 })
 
@@ -418,7 +450,7 @@ angular.module('app.controllers', [])
 					group_item_key: newGroupItemKey
 				});
 
-				$scope.close();
+				$scope.closeModal(1);
 			}
 		}
 	}

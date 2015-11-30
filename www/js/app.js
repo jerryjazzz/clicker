@@ -12,6 +12,23 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'firebase','m
     if(window.StatusBar) {
       StatusBar.styleDefault();
     }
+
+    //This code snippet will be used to save user's authentication (one time login)
+    fb.onAuth(function (authData) {
+      if (authData) {
+        console.log("Logged in as:", authData);
+        /* STORE AUTHDATA */
+        //$rootScope.authData = authData;
+        //$rootScope.email = $rootScope.authData.password.email;
+        //$state.go("tab.dash");
+      } else {
+        console.log("Not logged in");
+        //$rootScope.hide();
+        //$state.go("intro");
+        //$state.go("login");
+      }
+    });
+
   });
 })
 
