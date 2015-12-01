@@ -42,6 +42,13 @@ angular.module('app.services', [])
       var user_key = window.localStorage.getItem("user_key");
       return JSON.parse(user_key);
     },
+    setUserName: function(user_name) {
+      window.localStorage.setItem("user_name", JSON.stringify(user_name));
+    },
+    getUserName: function() {
+      var user_name = window.localStorage.getItem("user_name");
+      return JSON.parse(user_name);
+    },
     get: function(chatId) {
       for (var i = 0; i < chats.length; i++) {
         if (chats[i].id === parseInt(chatId)) {

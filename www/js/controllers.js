@@ -32,6 +32,8 @@ angular.module('app.controllers', [])
 	        Users.setEmail(userData.email);
 	        //Save Firebase user key
 	        Users.setUserKey(authData.uid);
+	        //Save Firebase user name
+	        $scope.setUserName(authData.uid);
 
 	        $state.go("grouplist");
 	      }
@@ -68,6 +70,8 @@ angular.module('app.controllers', [])
 		    Users.setEmail(authData.facebook.email);
 		    //Save Firebase user key
 	        Users.setUserKey(authData.uid);
+	        //Save Firebase user name
+	        $scope.setUserName(authData.uid);
 
 		    $rootScope.hide();
 		    $state.go("grouplist");
@@ -75,6 +79,17 @@ angular.module('app.controllers', [])
 		}, {
 		  scope: "email,user_likes,user_friends"
 		});
+	};
+
+	//Save Firebase user name
+	$scope.setUserName = function(user_key) {
+		var userRef = fb.child("users").child(user_key);
+
+		userRef.once("value", function(snapshot) {
+			var user = snapshot.val();
+			Users.setUserName(user.name);
+		});
+
 	};
 
 	$scope.loginErrorMessages = function(error) {
@@ -154,6 +169,8 @@ angular.module('app.controllers', [])
 	            Users.setEmail(email);
 	      	  	//Save Firebase user key
 	      	 	Users.setUserKey(userData.uid);
+	      	 	//Save Firebase user name
+				$scope.setUserName(userData.uid);
 
 	            $rootScope.hide();
 	            console.log("Authenticated successfully with payload:", authData);
@@ -164,10 +181,21 @@ angular.module('app.controllers', [])
 	      }
 	    });
 	};
+
+	//Save Firebase user name
+	$scope.setUserName = function(user_key) {
+		var userRef = fb.child("users").child(user_key);
+
+		userRef.once("value", function(snapshot) {
+			var user = snapshot.val();
+			Users.setUserName(user.name);
+		});
+	};
 })
 
 .controller('groupListController', function($scope, $ionicModal, Users, $timeout, $ionicPopup) {
 	$scope.$on('$ionicView.enter', function(){
+		console.log(Users.getUserName());
 		$scope.refresh();
 	});
 
@@ -185,12 +213,13 @@ angular.module('app.controllers', [])
 				//Insert the new group in the firebase
 				var user_email = Users.getEmail();
 				var user_key = Users.getUserKey();
+				var user_name = Users.getUserName();
 
 				var newGroupRef = fb.child("groups");
 				newGroupRef = newGroupRef.push({
-				group_name: group.name,
-				group_admin: user_email,
-				created_dt: Date.now()
+					group_name: group.name,
+					group_admin: user_email,
+					created_dt: Date.now()
 				});
 
 				//Get the unique key created by push method
@@ -206,11 +235,13 @@ angular.module('app.controllers', [])
 				//To insert group admin as member
 				newGroupRef = fb.child("groups").child(newGroupKey).child("group_member");
 				newGroupRef.push({
-					email: user_email
+					key: user_key,
+					name: user_name,
+					email: user_email,
+					group_admin: true
 				});
 
 				//To insert the group into user's entity
-
 				var userRef = fb.child("users").child(user_key).child("group_list");
 				userRef.push({group_key: newGroupKey});
 
@@ -335,6 +366,28 @@ angular.module('app.controllers', [])
      });*/
     };
     //End
+})
+
+.controller('groupListMemberController', function($scope, $stateParams) {
+	$scope.group_name = $stateParams.grp_name;
+	var group_key = $stateParams.grp_key;
+	$scope.listOfAllGroupMembers = [];
+
+	var groupMemberRef = fb.child("groups").child(group_key).child("group_member");
+
+	groupMemberRef.on("value", function(snapshot) {
+		$scope.listOfAllGroupMembers = [];
+
+		snapshot.forEach(function(childSnapShot) {
+			$scope.listOfAllGroupMembers.push(childSnapShot.val());
+		});
+		console.log($scope.listOfAllGroupMembers);
+	});
+
+	$scope.removeGroupMember = function(member_key) {
+
+	};
+
 })
 
 .controller('groupController', function($scope, $stateParams, $ionicModal, $timeout, $ionicPopup, Users) {
@@ -534,6 +587,7 @@ angular.module('app.controllers', [])
 			if(new_member_email) {
 				var chkValidUser = false;
 				var user_key = "";
+				var user_name = "";
 				var userRef = fb.child("users");
 
 				//To check if the user is a valid user to be added to the group
@@ -545,6 +599,7 @@ angular.module('app.controllers', [])
 							//Check if the user entered email is a valid email
 							if(new_member_email == user.email) {
 								user_key = childSnapShot.key();
+								user_name = user.name;
 								chkValidUser = true;
 							}
 						});
@@ -577,7 +632,12 @@ angular.module('app.controllers', [])
 										group_member_count: group_member_count + 1
 									});
 
-									groupMemberRef.push({'email': new_member_email});
+									groupMemberRef.push({
+										'key': user_key,
+										'name': user_name, 
+										'email': new_member_email,
+										'group_admin': false
+									});
 
 									userGroupRef.push({'group_key': group_key});
 

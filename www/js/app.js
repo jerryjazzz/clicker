@@ -1,5 +1,5 @@
 // Firebase initialization
-// Jack's FB environment
+// Production FB environment
 var fb = new Firebase("https://clickerprj.firebaseio.com/");
 
 angular.module('app', ['ionic', 'app.controllers', 'app.services', 'firebase','monospaced.qrcode','ngCordova'])
@@ -49,6 +49,15 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'firebase','m
       url: '/grouplist',
       templateUrl: 'templates/grouplist.html',
       controller: 'groupListController'
+    })
+    .state('grouplistmember', {
+      url: '/grouplistmember',
+      templateUrl: 'templates/grouplistmember.html',
+      controller: 'groupListMemberController',
+      params: {
+        grp_key: null,
+        grp_name: null
+      }
     })
     .state('group', {
         url: '/grouplist',
