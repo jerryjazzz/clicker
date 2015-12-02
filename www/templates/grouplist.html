@@ -1,11 +1,16 @@
 <ion-view title="Groups">
+	<ion-nav-buttons side="left">
+		<button class="button button-icon" ng-click="scanQR()">
+		  <i class="icon ion-qr-scanner"></i>
+		</button>
+	</ion-nav-buttons>
 	<ion-nav-buttons side="right">
 		<button class="button button-icon" ng-click="new()">
 		  <i class="icon ion-person-stalker"></i>
 		</button>
 	</ion-nav-buttons>
     <ion-content padding="'false'" style="background: url(img/snowman.jpg) no-repeat center;" class="has-header">
-      <ion-refresher spinner="ripple" on-refresh="refresh()">       
+      <ion-refresher spinner="ripple" on-refresh="refresh()">
       </ion-refresher>
       <ion-list ng-repeat="group in listOfAllGroups">
         <ion-item ui-sref="group({grp_key: group.group_key, grp_name: group.group_name})">

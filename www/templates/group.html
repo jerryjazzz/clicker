@@ -45,7 +45,7 @@
 
       <div class="card">
         <ion-header-bar class="bar-balanced">
-          <h1 class="title">{{curGroup.group_name}}</h1>
+          <h1 class="title">{{group_name}}</h1>
           <button class="button button-clear button-positive" ng-click="closeModal(2)">Cancel</button>
         </ion-header-bar>
 
@@ -53,13 +53,13 @@
           <div class="row responsive-sm">
             <div class="col"></div>
             <div class="col text-center">
-              <qrcode version="4" error-correction-level="M" size="150" data="{{curGroup.group_key}}"></qrcode>
+              <qrcode version="4" error-correction-level="M" size="150" data="{{grp_key}}"></qrcode>
             </div>
             <div class="col"></div>
           </div>
           <div class="row responsive-sm">
             <div class="col"></div>
-              <h4 class="title">Scan QR Code to join {{curGroup.group_name}} group</h4>
+              <h4 class="title">Scan QR Code to join {{group_name}} group</h4>
             <div class="col"></div>
           </div>
         </ion-content>

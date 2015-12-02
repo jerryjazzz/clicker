@@ -193,7 +193,7 @@ angular.module('app.controllers', [])
 	};
 })
 
-.controller('groupListController', function($scope, $ionicModal, Users, $timeout, $ionicPopup) {
+.controller('groupListController', function($scope, $ionicModal, Users, $timeout, $ionicPopup, $cordovaBarcodeScanner) {
 	$scope.$on('$ionicView.enter', function(){
 		console.log(Users.getUserName());
 		$scope.refresh();
@@ -290,10 +290,10 @@ angular.module('app.controllers', [])
 	    $timeout( function() {
 	    	var user_group_list = [];
 	    	var user_key = Users.getUserKey();
-	    	
+
 	    	var userRef = fb.child("users").child(user_key).child("group_list");
 	    	var allGroupsRef = fb.child("groups");
-	    	
+
 	    	//To get a list of groups that are relevant to the user
 	    	userRef.on("value", function(snapshot) {
 	    		snapshot.forEach(function(childSnapShot) {
@@ -324,7 +324,7 @@ angular.module('app.controllers', [])
 					  	}
 
 					  	if(chkIsUserGroup) {
-					  		$scope.listOfAllGroups.push(group);	
+					  		$scope.listOfAllGroups.push(group);
 					  	}
 					  }
 					});
@@ -337,7 +337,7 @@ angular.module('app.controllers', [])
 					console.log("The read failed: " + errorObject.code);
 				});
 
-	    	});	
+	    	});
 		}, 1000);
     };
 
@@ -366,6 +366,99 @@ angular.module('app.controllers', [])
      });*/
     };
     //End
+
+		// scan QR code
+		$scope.showMsg = function(msg){
+			var alertPopup = $ionicPopup.alert({
+				title : 'Clicker',
+				template: msg
+			})
+		}
+
+		$scope.scanQR = function(){
+			$cordovaBarcodeScanner.scan().then(function(imageData) {
+          //alert(imageData.text);
+
+					var scanGrp_key = imageData.text;
+
+					var user_email = Users.getEmail();
+					var user_key = Users.getUserKey();
+					var user_name = Users.getUserName();
+
+		    	var userRef = fb.child("users").child(user_key).child("group_list");
+		    	var allGroupsRef = fb.child("groups");
+					var group_member_count = 0;
+
+					var IsUserGroup = false;
+					var IsGroupValid = false;
+
+					// check if group is valid
+					allGroupsRef.once("value",function(snapshot){
+							snapshot.forEach(function(childSnapShot){
+								var group = childSnapShot.val();
+
+								if(group.group_key == scanGrp_key)
+								{
+									IsGroupValid = true;
+									group_member_count = group.group_member_count;
+								}
+
+
+							});
+					});
+
+					// check if user already assigned to the group
+					if(IsGroupValid){
+						userRef.once("value",function(snapshot){
+							snapshot.forEach(function(childSnapShot){
+								var grpKey = childSnapShot.val();
+
+								if(grpKey == scanGrp_key)
+									IsUserGroup = true;
+							});
+						});
+					}else {
+						$scope.showMsg("Invalid Group Info");
+						return;
+					}
+
+					// if user not assigned and group valid - proceed to add
+					if(!IsUserGroup && IsGroupValid){
+						//var group_member_count = 0;
+						var groupRef = fb.child("groups").child(scanGrp_key);
+						var groupMemberRef = fb.child("groups").child(scanGrp_key).child("group_member");
+						var userGroupRef = fb.child("users").child(user_key).child("group_list");
+
+
+						// get group member count
+
+						groupRef.update({
+							group_member_count: group_member_count + 1
+						});
+
+						groupMemberRef.push({
+							'key': user_key,
+							'name': user_name,
+							'email': user_email,
+							'group_admin': false
+						});
+
+						userGroupRef.push({'group_key': scanGrp_key});
+
+						$scope.showMsg("User has been added successfully");
+						$scope.refresh();
+
+					}else{
+						$scope.showMsg("Group is added already");
+						return;
+					}
+
+          console.log("Barcode Format -> " + imageData.format);
+          console.log("Cancelled -> " + imageData.cancelled);
+      }, function(error) {
+          console.log("An error happened -> " + error);
+      });
+		};
 })
 
 .controller('groupListMemberController', function($scope, $stateParams) {
@@ -394,6 +487,7 @@ angular.module('app.controllers', [])
 	var user_email = Users.getEmail();
 	var group_key = $stateParams.grp_key;
 	$scope.group_name = $stateParams.grp_name;
+	$scope.grp_key = group_key;
 
 	$scope.$on('$ionicView.enter', function(){
 		$scope.refreshWithoutTimeout();
@@ -504,6 +598,7 @@ angular.module('app.controllers', [])
 				});
 
 				$scope.closeModal(1);
+				item.name = ""; // clear previous item after save
 			}
 		}
 	}
@@ -562,8 +657,8 @@ angular.module('app.controllers', [])
 			subTitle: 'Please enter e-mail',
 			scope: $scope,
 			buttons: [
-				{ 
-					text: 'Cancel', 
+				{
+					text: 'Cancel',
 					onTap: function(e) {
 						return false;
 					}
@@ -620,7 +715,7 @@ angular.module('app.controllers', [])
 								if(new_member_email == member.email)
 									chk_is_member = true;
 							});
-							
+
 							//If user hasn't been added to the group
 							if(!chk_is_member) {
 								// Add the user to the group entity
@@ -634,7 +729,7 @@ angular.module('app.controllers', [])
 
 									groupMemberRef.push({
 										'key': user_key,
-										'name': user_name, 
+										'name': user_name,
 										'email': new_member_email,
 										'group_admin': false
 									});
@@ -660,7 +755,7 @@ angular.module('app.controllers', [])
 				}, function (errorObject) {
 					console.log("The read failed: " + errorObject.code);
 				});
-			}		
+			}
 		});
 
 	};
