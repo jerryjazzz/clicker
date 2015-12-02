@@ -1,9 +1,9 @@
 <ion-view title="{{group_name}}">
-	<ion-nav-buttons side="right">
-		<button class="button button-icon" ng-click="new()">
-		  <i class="icon ion-person-stalker"></i>
-		</button>
-	</ion-nav-buttons>
+  <ion-nav-buttons side="right">
+    <button class="button button-icon" ng-click="new()">
+      <i class="icon ion-person-stalker"></i>
+    </button>
+  </ion-nav-buttons>
     <ion-content padding="'false'" style="background: url(img/snowman.jpg) no-repeat center;" class="has-header">
       <ion-list ng-repeat="member in listOfAllGroupMembers">
         <ion-item>
@@ -13,6 +13,6 @@
           <h2>{{member.name}}</h2>
           <p>{{member.email}}</p>
         </ion-item>
-	    </ion-list>
+      </ion-list>
     </ion-content>
 </ion-view>
