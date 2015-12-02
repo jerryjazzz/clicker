@@ -42,8 +42,14 @@ angular.module('app.services', [])
       var user_key = window.localStorage.getItem("user_key");
       return JSON.parse(user_key);
     },
-    setUserName: function(user_name) {
-      window.localStorage.setItem("user_name", JSON.stringify(user_name));
+    setUserName: function(user_key) {
+      var userRef = fb.child("users").child(user_key);
+
+      userRef.once("value", function(snapshot) {
+        var user = snapshot.val();
+        window.localStorage.setItem("user_name", JSON.stringify(user.name));
+      });
+      
     },
     getUserName: function() {
       var user_name = window.localStorage.getItem("user_name");

@@ -33,7 +33,7 @@ angular.module('app.controllers', [])
 	        //Save Firebase user key
 	        Users.setUserKey(authData.uid);
 	        //Save Firebase user name
-	        $scope.setUserName(authData.uid);
+	        Users.setUserName(authData.uid);
 
 	        $state.go("grouplist");
 	      }
@@ -71,7 +71,7 @@ angular.module('app.controllers', [])
 		    //Save Firebase user key
 	        Users.setUserKey(authData.uid);
 	        //Save Firebase user name
-	        $scope.setUserName(authData.uid);
+	        Users.setUserName(authData.uid);
 
 		    $rootScope.hide();
 		    $state.go("grouplist");
@@ -79,17 +79,6 @@ angular.module('app.controllers', [])
 		}, {
 		  scope: "email,user_likes,user_friends"
 		});
-	};
-
-	//Save Firebase user name
-	$scope.setUserName = function(user_key) {
-		var userRef = fb.child("users").child(user_key);
-
-		userRef.once("value", function(snapshot) {
-			var user = snapshot.val();
-			Users.setUserName(user.name);
-		});
-
 	};
 
 	$scope.loginErrorMessages = function(error) {
@@ -170,7 +159,8 @@ angular.module('app.controllers', [])
 	      	  	//Save Firebase user key
 	      	 	Users.setUserKey(userData.uid);
 	      	 	//Save Firebase user name
-				$scope.setUserName(userData.uid);
+				//$scope.setUserName(userData.uid);
+				Users.setUserName(userData.uid);
 
 	            $rootScope.hide();
 	            console.log("Authenticated successfully with payload:", authData);
@@ -180,16 +170,6 @@ angular.module('app.controllers', [])
 	        //End
 	      }
 	    });
-	};
-
-	//Save Firebase user name
-	$scope.setUserName = function(user_key) {
-		var userRef = fb.child("users").child(user_key);
-
-		userRef.once("value", function(snapshot) {
-			var user = snapshot.val();
-			Users.setUserName(user.name);
-		});
 	};
 })
 
@@ -218,7 +198,7 @@ angular.module('app.controllers', [])
 				var newGroupRef = fb.child("groups");
 				newGroupRef = newGroupRef.push({
 					group_name: group.name,
-					group_admin: user_email,
+					group_creator: user_email,
 					created_dt: Date.now()
 				});
 
@@ -227,7 +207,7 @@ angular.module('app.controllers', [])
 
 				//To insert the newly generated unique key to the group entity
 				newGroupRef = fb.child("groups").child(newGroupKey);
-					newGroupRef.update({
+				newGroupRef.update({
 					group_key: newGroupKey,
 					group_member_count: 1
 				});
@@ -254,14 +234,15 @@ angular.module('app.controllers', [])
 	$scope.removeGroup = function(group_key) {
 	    var isGroupAdmin = false;
 	    var user_email = Users.getEmail();
-
 	    for(var i=0; i<$scope.listOfAllGroups.length; i++) {
 	      if($scope.listOfAllGroups[i].group_key == group_key) {
-	        if($scope.listOfAllGroups[i].group_admin == user_email) {
-	          isGroupAdmin = true;
-	          break;
-	        }
-
+	        angular.forEach($scope.listOfAllGroups[i].group_member, function(groupMember, key) {
+				if(groupMember.email == user_email) {
+					if(groupMember.group_admin) {
+						isGroupAdmin = true;
+					}
+				}
+			});
 	      }
 	    }
 
@@ -461,7 +442,7 @@ angular.module('app.controllers', [])
 		};
 })
 
-.controller('groupListMemberController', function($scope, $stateParams) {
+.controller('groupListMemberController', function($scope, $stateParams, $ionicPopup, Users) {
 	$scope.group_name = $stateParams.grp_name;
 	var group_key = $stateParams.grp_key;
 	$scope.listOfAllGroupMembers = [];
@@ -472,15 +453,71 @@ angular.module('app.controllers', [])
 		$scope.listOfAllGroupMembers = [];
 
 		snapshot.forEach(function(childSnapShot) {
-			$scope.listOfAllGroupMembers.push(childSnapShot.val());
+			var groupMember = childSnapShot.val();
+			groupMember.member_key = childSnapShot.key();
+
+			$scope.listOfAllGroupMembers.push(groupMember);
 		});
 		console.log($scope.listOfAllGroupMembers);
 	});
 
-	$scope.removeGroupMember = function(member_key) {
+	$scope.removeGroupMember = function(member_key, user_key) {
+		var loginUserKey = Users.getUserKey();
+
+		//To check if the user has accidentally deleted him/herself
+		if(loginUserKey != user_key) {
+
+			var confirmPopup = $ionicPopup.confirm({
+				title: 'Clicker',
+				template: 'Are you sure you want to delete this user from the group?'
+			});
+
+			confirmPopup.then(function(confirm) {
+				//If user confirm to drop the user from the group
+				if(confirm) {
+					//Remove group from user entity
+					var userRef = fb.child("users").child(user_key).child("group_list");
+					userRef.once("value", function(snapshot) {
+						snapshot.forEach(function(childSnapShot) {
+							var userGroupList = childSnapShot.val();
+
+							if(group_key == userGroupList.group_key) {
+								var userGroupListRef = fb.child("users").child(user_key).child("group_list").child(childSnapShot.key());
+								userGroupListRef.remove();
+
+								//Remove member from group entity
+								var groupMemberRef = fb.child("groups").child(group_key).child("group_member").child(member_key);
+								groupMemberRef.remove();
+
+								//Deduct member count
+								var groupRef = fb.child("groups").child(group_key);
+								groupRef.once("value", function(snapshot) {
+									var group = snapshot.val();
+
+									groupRef.update({
+										group_member_count: group.group_member_count - 1
+									});
+
+								});
+							}
+						});
+					});
+				}
+			});
+		}
+		else {
+			$scope.showAlert("Invalid Operation");
+		}
 
 	};
 
+	    // An alert dialog - Saved Sucessfully
+    $scope.showAlert = function(message) {
+		var alertPopup = $ionicPopup.alert({
+			title: 'Clicker',
+			template: message
+		});
+    };
 })
 
 .controller('groupController', function($scope, $stateParams, $ionicModal, $timeout, $ionicPopup, Users) {
@@ -524,10 +561,6 @@ angular.module('app.controllers', [])
 					//Stop the ion-refresher from spinning
 					$scope.$broadcast('scroll.refreshComplete');
 				});
-
-
-        	//$scope.listOfAllGroupItems = snapshot.val();
-			//$scope.$broadcast('scroll.refreshComplete');
 
 	        }, function (errorObject) {
 	        console.log("The read failed: " + errorObject.code);
