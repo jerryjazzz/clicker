@@ -244,7 +244,7 @@ angular.module('app.controllers', [])
 				//To insert the group into user's entity
 				var userRef = fb.child("users").child(user_key).child("group_list");
 				userRef.push({group_key: newGroupKey});
-
+				group.name = ""; // clear cache
 				$scope.refresh();
 			}
 		}
