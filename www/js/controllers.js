@@ -215,10 +215,10 @@ angular.module('app.controllers', [])
 				//To insert group admin as member
 				newGroupRef = fb.child("groups").child(newGroupKey).child("group_member");
 				newGroupRef.push({
-					key: user_key,
-					name: user_name,
-					email: user_email,
-					group_admin: true
+					'user_key': user_key,
+					'user_name': user_name,
+					'user_email': user_email,
+					'group_admin': true
 				});
 
 				//To insert the group into user's entity
@@ -418,9 +418,9 @@ angular.module('app.controllers', [])
 						});
 
 						groupMemberRef.push({
-							'key': user_key,
-							'name': user_name,
-							'email': user_email,
+							'user_key': user_key,
+							'user_name': user_name,
+							'user_email': user_email,
 							'group_admin': false
 						});
 
@@ -462,53 +462,66 @@ angular.module('app.controllers', [])
 	});
 
 	$scope.removeGroupMember = function(member_key, user_key) {
+		var chkIsGroupAdmin = false;
 		var loginUserKey = Users.getUserKey();
 
-		//To check if the user has accidentally deleted him/herself
-		if(loginUserKey != user_key) {
-
-			var confirmPopup = $ionicPopup.confirm({
-				title: 'Clicker',
-				template: 'Are you sure you want to delete this user from the group?'
-			});
-
-			confirmPopup.then(function(confirm) {
-				//If user confirm to drop the user from the group
-				if(confirm) {
-					//Remove group from user entity
-					var userRef = fb.child("users").child(user_key).child("group_list");
-					userRef.once("value", function(snapshot) {
-						snapshot.forEach(function(childSnapShot) {
-							var userGroupList = childSnapShot.val();
-
-							if(group_key == userGroupList.group_key) {
-								var userGroupListRef = fb.child("users").child(user_key).child("group_list").child(childSnapShot.key());
-								userGroupListRef.remove();
-
-								//Remove member from group entity
-								var groupMemberRef = fb.child("groups").child(group_key).child("group_member").child(member_key);
-								groupMemberRef.remove();
-
-								//Deduct member count
-								var groupRef = fb.child("groups").child(group_key);
-								groupRef.once("value", function(snapshot) {
-									var group = snapshot.val();
-
-									groupRef.update({
-										group_member_count: group.group_member_count - 1
-									});
-
-								});
-							}
-						});
-					});
+		for(var i=0; i<$scope.listOfAllGroupMembers.length; i++) {
+			if(loginUserKey == $scope.listOfAllGroupMembers[i].user_key) {
+				if($scope.listOfAllGroupMembers[i].group_admin) {
+					chkIsGroupAdmin = true;
 				}
-			});
+			}
+		}
+
+		if(chkIsGroupAdmin) {
+			//To check if the user has accidentally deleted him/herself
+			if(loginUserKey != user_key) {
+
+				var confirmPopup = $ionicPopup.confirm({
+					title: 'Clicker',
+					template: 'Are you sure you want to delete this user from the group?'
+				});
+
+				confirmPopup.then(function(confirm) {
+					//If user confirm to drop the user from the group
+					if(confirm) {
+						//Remove group from user entity
+						var userRef = fb.child("users").child(user_key).child("group_list");
+						userRef.once("value", function(snapshot) {
+							snapshot.forEach(function(childSnapShot) {
+								var userGroupList = childSnapShot.val();
+
+								if(group_key == userGroupList.group_key) {
+									var userGroupListRef = fb.child("users").child(user_key).child("group_list").child(childSnapShot.key());
+									userGroupListRef.remove();
+
+									//Remove member from group entity
+									var groupMemberRef = fb.child("groups").child(group_key).child("group_member").child(member_key);
+									groupMemberRef.remove();
+
+									//Deduct member count
+									var groupRef = fb.child("groups").child(group_key);
+									groupRef.once("value", function(snapshot) {
+										var group = snapshot.val();
+
+										groupRef.update({
+											group_member_count: group.group_member_count - 1
+										});
+
+									});
+								}
+							});
+						});
+					}
+				});
+			}
+			else {
+				$scope.showAlert("Invalid Operation");
+			}
 		}
 		else {
-			$scope.showAlert("Invalid Operation");
+			$scope.showAlert("Opps! Only group admin is allowed to perform this operation.");
 		}
-
 	};
 
 	    // An alert dialog - Saved Sucessfully
@@ -761,9 +774,9 @@ angular.module('app.controllers', [])
 									});
 
 									groupMemberRef.push({
-										'key': user_key,
-										'name': user_name,
-										'email': new_member_email,
+										'user_key': user_key,
+										'user_name': user_name,
+										'user_email': new_member_email,
 										'group_admin': false
 									});
 
