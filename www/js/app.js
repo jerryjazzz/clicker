@@ -48,7 +48,12 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'firebase','m
     .state('grouplist', {
       url: '/grouplist',
       templateUrl: 'templates/grouplist.html',
-      controller: 'groupListController'
+      controller: 'groupListController',
+      onEnter: function($state, SessionAuth){
+        if(!SessionAuth.isLoggedIn()){
+           $state.go('login');
+        }
+      }
     })
     .state('grouplistmember', {
       url: '/grouplistmember',
@@ -70,6 +75,6 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'firebase','m
     });
 
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/login');
+  $urlRouterProvider.otherwise('/grouplist');
 
 });

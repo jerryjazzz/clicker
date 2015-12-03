@@ -15,6 +15,23 @@ angular.module('app.services', [])
     return $firebaseAuth(usersRef);
 })
 
+// use session data to login
+.factory('SessionAuth',function(){
+  return{
+    isLoggedIn: function () {
+      var user_key = JSON.parse(window.localStorage.getItem("user_key"));
+          if(user_key == null || user_key == undefined || user_key == ""){
+            return false;
+          }else {
+            return true;
+          }
+         //return _user ? true : false;
+      }
+  }
+
+
+})
+
 //Users Factory
 .factory('Users', function() {
   return {
@@ -49,7 +66,7 @@ angular.module('app.services', [])
         var user = snapshot.val();
         window.localStorage.setItem("user_name", JSON.stringify(user.name));
       });
-      
+
     },
     getUserName: function() {
       var user_name = window.localStorage.getItem("user_name");
@@ -98,4 +115,3 @@ angular.module('app.services', [])
   return null;
 
 });
-

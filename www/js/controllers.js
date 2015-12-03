@@ -175,8 +175,8 @@ angular.module('app.controllers', [])
 
 .controller('groupListController', function($scope, $ionicModal, Users, $timeout, $ionicPopup, $cordovaBarcodeScanner) {
 	$scope.$on('$ionicView.enter', function(){
-		console.log(Users.getUserName());
-		$scope.refresh();
+			console.log(Users.getUserName());
+			$scope.refresh();
 	});
 
 	//Load all the groups from local storage (if any) to improve performance
