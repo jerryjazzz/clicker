@@ -42,7 +42,7 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'firebase','m
     })
     .state('signup', {
       url: '/signup',
-      templateUrl: 'templates/signup.html',
+      templateUrl: 'templates/signUp.html',
       controller: 'signupController'
     })
     .state('grouplist', {
