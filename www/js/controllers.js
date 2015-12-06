@@ -173,7 +173,7 @@ angular.module('app.controllers', [])
 	};
 })
 
-.controller('groupListController', function($scope, $ionicModal, Users, $timeout, $ionicPopup, $cordovaBarcodeScanner) {
+.controller('groupListController', function($scope, Users, $timeout, $ionicPopup, $cordovaBarcodeScanner, $timeout) {
 	$scope.$on('$ionicView.enter', function(){
 			console.log(Users.getUserName());
 			$scope.refresh();
@@ -187,7 +187,7 @@ angular.module('app.controllers', [])
 	//End
 
 	$scope.save   = function(group) {
-		// save the group and close the modal;
+		// save the group
 		if(group) {
 			if(group.name) {
 				//Insert the new group in the firebase
@@ -228,16 +228,20 @@ angular.module('app.controllers', [])
 				$scope.refresh();
 			}
 		}
-		$scope.close();
 	};
 
 	$scope.removeGroup = function(group_key) {
 	    var isGroupAdmin = false;
 	    var user_email = Users.getEmail();
+	    var all_group_members = [];
+
 	    for(var i=0; i<$scope.listOfAllGroups.length; i++) {
 	      if($scope.listOfAllGroups[i].group_key == group_key) {
-	        angular.forEach($scope.listOfAllGroups[i].group_member, function(groupMember, key) {
-				if(groupMember.email == user_email) {
+	      	angular.forEach($scope.listOfAllGroups[i].group_member, function(groupMember, key) {
+				//Store all the members of that group in an array which will be used later upon removing the group
+		      	all_group_members.push(groupMember);
+		      	//End
+				if(groupMember.user_email == user_email) {
 					if(groupMember.group_admin) {
 						isGroupAdmin = true;
 					}
@@ -254,6 +258,22 @@ angular.module('app.controllers', [])
 			});
 			confirmPopup.then(function(res) {
 				if(res) {
+					//Remove group from user entity (for all the group members)
+					angular.forEach(all_group_members, function(member, key) {
+						var userGroupRef = fb.child("users").child(member.user_key).child("group_list");
+						userGroupRef.once("value", function(snapshot) {
+							//var userGroupList = snapshot.val();
+							snapshot.forEach(function(childSnapShot) {
+								var userGroup = childSnapShot.val();
+								if(userGroup.group_key == group_key) {
+									var userDelGroupRef = fb.child("users").child(member.user_key).child("group_list").child(childSnapShot.key());
+									userDelGroupRef.remove();
+								}
+							});
+						});
+					});
+
+					//Remove group from group entity
 					var groupRef = fb.child("groups").child(group_key);
 					groupRef.remove();
 					$scope.refresh();
@@ -261,7 +281,7 @@ angular.module('app.controllers', [])
 			});
 	    }
 	    else {
-	    	$scope.showAlert();
+	    	$scope.showAlert('Opps only admin can delete group!');
 	    }
 
     };
@@ -322,25 +342,46 @@ angular.module('app.controllers', [])
 		}, 1000);
     };
 
-	$ionicModal.fromTemplateUrl('create_group.html', function(modal) {
-	    $scope.modal = modal;
-	}, {
-		scope: $scope
-	});
+    $scope.addNewGroup    = function() {
+     	$scope.newGroup = {};
 
-    $scope.new    = function() {
-     	$scope.modal.show();
+ 		var myPopup = $ionicPopup.show({
+			template: '<input type="text" ng-model="newGroup.name">',
+			title: 'Add New Group',
+			subTitle: 'Please enter group name',
+			scope: $scope,
+			buttons: [
+				{
+					text: 'Cancel',
+					onTap: function(e) {
+						return false;
+					}
+				},
+				{
+					text: '<b>Save</b>',
+					type: 'button-positive',
+					onTap: function(e) {
+						if (!$scope.newGroup.name) {
+							//don't allow the user to close unless he enters wifi password
+							e.preventDefault();
+						} else {
+							return $scope.newGroup;
+						}
+					}
+				}
+			]
+		});	
+
+     	myPopup.then(function(newGroup) {
+     		$scope.save(newGroup);
+		});
     };
 
-	$scope.close  = function() {
-		$scope.modal.hide();
-	};
-
     // An alert dialog - Saved Sucessfully
-    $scope.showAlert = function() {
+    $scope.showAlert = function(message) {
      var alertPopup = $ionicPopup.alert({
        title: 'Clicker',
-       template: 'Opps only admin can delete group!'
+       template: message
      });
      /*alertPopup.then(function(res) {
        console.log('Saved Successfully');
@@ -458,7 +499,6 @@ angular.module('app.controllers', [])
 
 			$scope.listOfAllGroupMembers.push(groupMember);
 		});
-		console.log($scope.listOfAllGroupMembers);
 	});
 
 	$scope.removeGroupMember = function(member_key, user_key) {
@@ -623,30 +663,59 @@ angular.module('app.controllers', [])
       });
     };
 
-	$scope.save = function(item) {
-		if(item) {
-			if(item.name) {
-				//To save the new item
-				groupRef = fb.child("groups").child(group_key).child("group_item");
+	$scope.addNewItem = function() {
+		$scope.groupItem = {};
 
-				groupRef = groupRef.push({
-					name: item.name,
-					votes: 0
-				});
+		// An elaborate, custom popup
+		var myPopup = $ionicPopup.show({
+			template: '<input type="text" ng-model="groupItem.name">',
+			title: 'Add New Item',
+			subTitle: 'Please enter the item',
+			scope: $scope,
+			buttons: [
+				{
+					text: 'Cancel',
+					onTap: function(e) {
+						return false;
+					}
+				},
+				{
+					text: '<b>Save</b>',
+					type: 'button-positive',
+					onTap: function(e) {
+						if (!$scope.groupItem.name) {
+							//don't allow the user to close unless he enters wifi password
+							e.preventDefault();
+						} else {
+							return $scope.groupItem;
+						}
+					}
+				}
+			]
+		});
 
-				//Get the unique key created by push method
-				var newGroupItemKey = groupRef.key();
+		myPopup.then(function(item) {
+			if(item) {
+				if(item.name) {
+					//To save the new item
+					groupRef = fb.child("groups").child(group_key).child("group_item");
 
-				//To insert the newly generated unique key to the group entity
-				groupRef = fb.child("groups").child(group_key).child("group_item").child(newGroupItemKey);
-				groupRef.update({
-					group_item_key: newGroupItemKey
-				});
+					groupRef = groupRef.push({
+						name: item.name,
+						votes: 0
+					});
 
-				$scope.closeModal(1);
-				item.name = ""; // clear previous item after save
+					//Get the unique key created by push method
+					var newGroupItemKey = groupRef.key();
+
+					//To insert the newly generated unique key to the group entity
+					groupRef = fb.child("groups").child(group_key).child("group_item").child(newGroupItemKey);
+					groupRef.update({
+						group_item_key: newGroupItemKey
+					});
+				}
 			}
-		}
+		});
 	}
 
 	$scope.vote = function(grpItem_key) {
@@ -694,7 +763,7 @@ angular.module('app.controllers', [])
 	}
 
 	$scope.invite = function() {
-		$scope.group = {}
+		$scope.group = {};
 
 		// An elaborate, custom popup
 		var myPopup = $ionicPopup.show({
@@ -806,20 +875,6 @@ angular.module('app.controllers', [])
 
 	};
 
-	$ionicModal.fromTemplateUrl('create_item.html', function(modal) {
-	    $scope.itemModal = modal;
-	}, {
-		scope: $scope
-	});
-
-  // $scope.new    = function() {
-  //    	$scope.modal.show();
-  //   };
-  //
-	// $scope.close  = function() {
-	// 	$scope.modal.hide();
-	// };
-
   // show group info
   $ionicModal.fromTemplateUrl('group_info.html', function(modal) {
 	    $scope.groupInfoModal = modal;
@@ -828,22 +883,12 @@ angular.module('app.controllers', [])
 	});
 
   // handle modal for both create new item and group info
-  $scope.openModal = function(index){
-      if(index == 1){
-          $scope.itemModal.show();
-      }
-      else {
-          $scope.groupInfoModal.show();
-      }
+  $scope.openModal = function(){
+    $scope.groupInfoModal.show();
   }
 
-  $scope.closeModal = function(index){
-    if(index == 1){
-        $scope.itemModal.hide();
-    }
-    else {
-        $scope.groupInfoModal.hide();
-    }
+  $scope.closeModal = function(){
+    $scope.groupInfoModal.hide();
   }
 
     // An alert dialog - Saved Sucessfully

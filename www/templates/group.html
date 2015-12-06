@@ -9,44 +9,20 @@
             <span class="badge badge-balanced" ng-bind="groupItem.votes"></span>
 	        </ion-item>
 		</ion-list>
-        <button class="button button-balanced button-block " ng-click="openModal(1)">New Item</button>
+        <button class="button button-balanced button-block " ng-click="addNewItem()">New Item</button>
         <button class="button button-positive button-block " ng-click="invite()" >Invite Friends</button>
-        <button class="button button-energized button-block " ng-click="openModal(2)">Group Info</button>
+        <button class="button button-energized button-block " ng-click="openModal()">Group Info</button>
     </ion-content>
 </ion-view>
 
 <!-- Pop up modal to create new quote -->
-<script id="create_item.html" type="text/ng-template">
-  <div class="modal">
-
-    <div class="card">
-      <ion-header-bar class="bar-balanced">
-        <h1 class="title">New Item</h1>
-        <button class="button button-clear button-positive" ng-click="closeModal(1)">Cancel</button>
-      </ion-header-bar>
-
-      <ion-content>
-        <div>
-          <div class="list">
-            <label class="item item-input">
-              <input type="text" placeholder="Enter your wish gift" ng-model="item.name">
-            </label>
-          </div>
-          <div class="padding">
-            <button type="submit" class="button button-block button-balanced" ng-click="save(item)">Save</button>
-          </div>
-        </div>
-      </ion-content>
-    </div>
-  </div>
-</script>
 <script id="group_info.html" type="text/ng-template">
     <div class="modal">
 
       <div class="card">
         <ion-header-bar class="bar-balanced">
           <h1 class="title">{{group_name}}</h1>
-          <button class="button button-clear button-positive" ng-click="closeModal(2)">Cancel</button>
+          <button class="button button-clear button-positive" ng-click="closeModal()">Cancel</button>
         </ion-header-bar>
 
         <ion-content>

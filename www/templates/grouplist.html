@@ -5,8 +5,8 @@
 		</button>
 	</ion-nav-buttons>
 	<ion-nav-buttons side="right">
-		<button class="button button-icon" ng-click="new()">
-		  <i class="icon ion-person-stalker"></i>
+		<button class="button button-icon" ng-click="addNewGroup()">
+		  <i class="icon ion-android-add-circle"></i>
 		</button>
 	</ion-nav-buttons>
     <ion-content padding="'false'" style="background: url(img/snowman.jpg) no-repeat center;" class="has-header">
@@ -26,30 +26,3 @@
 	    </ion-list>
     </ion-content>
 </ion-view>
-
-<!-- Pop up modal to create new quote -->
-<script id="create_group.html" type="text/ng-template">
-  <div class="modal">
-
-    <div class="card">
-      <ion-header-bar class="bar-balanced">
-        <h1 class="title">New Group</h1>
-        <button class="button button-clear button-positive" ng-click="close()">Cancel</button>
-      </ion-header-bar>
-
-      <ion-content>
-        <div>
-          <div class="list">
-            <label class="item item-input">
-              <input type="text" placeholder="Enter group name" ng-model="group.name">
-            </label>
-          </div>
-          <div class="padding">
-            <button type="submit" class="button button-block button-balanced" ng-click="save(group)">Save</button>
-          </div>
-        </div>
-      </ion-content>
-    </div>
-  </div>
-
-</script>
