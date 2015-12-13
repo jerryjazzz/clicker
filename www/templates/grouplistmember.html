@@ -1,5 +1,20 @@
 <ion-view title="{{group_name}}">
-    <ion-content padding="'false'" style="background: url(img/snowman.jpg) no-repeat center;" class="has-header">
+    <ion-content padding="false" class="has-header">
+      
+      <div class="item item-body">
+        <div class="row">
+          <div class="col col-50 col-offset-25">
+            <img class="full-image" src="img\login_bg.png">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col col-50 col-offset-25 text text-center">
+            User
+            <span><i class="icon ion-ribbon-b"></i></span>
+          </div>  
+        </div>
+      </div>
+
       <ion-list ng-repeat="member in listOfAllGroupMembers">
         <ion-item class="item-icon-right">
           <ion-option-button class="button-assertive" ng-click="removeGroupMember(member.member_key, member.user_key)">
