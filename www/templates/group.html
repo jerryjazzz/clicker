@@ -1,17 +1,46 @@
 <ion-view title="{{group_name}}">
-    <ion-content padding="'false'" style="background: url(img/snowman.jpg) no-repeat center;" class="has-header">
+    <ion-nav-buttons side="right">
+      <button class="button button-icon" ng-click = "openPopover($event)">
+        <i class="icon ion-android-more-horizontal"></i>
+      </button>
+    </ion-nav-buttons>
+
+    <ion-content padding="false" class="has-header">
         <ion-refresher spinner="ripple" on-refresh="refresh()">
         </ion-refresher>
-        <ion-list ng-repeat="groupItem in listOfAllGroupItems">
+        
+<!--         <ion-list ng-repeat="groupItem in listOfAllGroupItems">
         	<ion-item class="item-icon-left item-icon-right" ng-click="vote(groupItem.group_item_key)">
             <i ng-class="groupItem.voted ? 'icon ion-ios-heart assertive' : 'icon ion-ios-heart-outline'"></i>
             <p ng-bind="groupItem.name"></p>
             <span class="badge badge-balanced" ng-bind="groupItem.votes"></span>
 	        </ion-item>
-		</ion-list>
-        <button class="button button-balanced button-block " ng-click="addNewItem()">New Item</button>
+    		</ion-list> -->
+        <div class="list card" ng-repeat="groupItem in listOfAllGroupItems">
+
+          <div class="item item-avatar item-icon-right item-text-wrap" ng-click="vote(groupItem.group_item_key)">
+            <img src="">
+            <h2>{{groupItem.name}}</h2>
+            <p>by Sem</p>
+            <i ng-class="groupItem.voted ? 'icon ion-android-checkbox-outline balanced' : 'icon ion-android-checkbox-outline-blank'"></i>
+          </div>
+
+          <div class="item item-body">
+            <div class="row">
+              <div class="col col-50 col-offset-25 text-center">
+                <h1 style="color:grey;">
+                  {{groupItem.votes}}
+                  <p>likes</p>
+                </h1>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+<!--         <button class="button button-balanced button-block " ng-click="addNewItem()">New Item</button>
         <button class="button button-positive button-block " ng-click="invite()" >Invite Friends</button>
-        <button class="button button-energized button-block " ng-click="openModal()">Group Info</button>
+        <button class="button button-energized button-block " ng-click="openModal()">Group Info</button> -->
     </ion-content>
 </ion-view>
 
@@ -43,4 +72,15 @@
     </div>
 
 
+</script>
+
+<script id = "popover.html" type = "text/ng-template">
+   <ion-popover-view>
+      <ion-content>
+        <ion-list>
+          <ion-item ng-click="addNewItem()">New Entry</ion-item>
+          <ion-item ng-click="invite()">Invite Friends</ion-item>
+        </ion-list>
+      </ion-content>
+   </ion-popover-view>
 </script>

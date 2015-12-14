@@ -573,7 +573,7 @@ angular.module('app.controllers', [])
     };
 })
 
-.controller('groupController', function($scope, $stateParams, $ionicModal, $timeout, $ionicPopup, Users) {
+.controller('groupController', function($scope, $stateParams, $ionicModal, $timeout, $ionicPopup, Users, $ionicPopover) {
 	var user_email = Users.getEmail();
 	var group_key = $stateParams.grp_key;
 	$scope.group_name = $stateParams.grp_name;
@@ -664,6 +664,7 @@ angular.module('app.controllers', [])
     };
 
 	$scope.addNewItem = function() {
+		$scope.closePopover();
 		$scope.groupItem = {};
 
 		// An elaborate, custom popup
@@ -763,6 +764,7 @@ angular.module('app.controllers', [])
 	}
 
 	$scope.invite = function() {
+		$scope.closePopover();
 		$scope.group = {};
 
 		// An elaborate, custom popup
@@ -901,6 +903,36 @@ angular.module('app.controllers', [])
        console.log('Saved Successfully');
      });*/
     };
+
+
+   $ionicPopover.fromTemplateUrl('popover.html', {
+      scope: $scope
+   }).then(function(popover) {
+      $scope.popover = popover;
+   });
+
+   $scope.openPopover = function($event) {
+      $scope.popover.show($event);
+   };
+
+   $scope.closePopover = function() {
+      $scope.popover.hide();
+   };
+
+   //Cleanup the popover when we're done with it!
+   $scope.$on('$destroy', function() {
+      $scope.popover.remove();
+   });
+
+   // Execute action on hide popover
+   $scope.$on('popover.hidden', function() {
+      // Execute action
+   });
+
+   // Execute action on remove popover
+   $scope.$on('popover.removed', function() {
+      // Execute action
+   });
 
 })
 
