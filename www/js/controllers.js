@@ -178,7 +178,7 @@ angular.module('app.controllers', [])
 	};
 })
 
-.controller('groupListController', function($scope, Users, $timeout, $ionicPopup, $cordovaBarcodeScanner, $timeout) {
+.controller('groupListController', function($scope, Users, $timeout, $ionicPopup, $cordovaBarcodeScanner, $timeout, $ionicPopover) {
 	$scope.$on('$ionicView.enter', function(){
 			console.log(Users.getUserName());
 			$scope.refresh();
@@ -235,6 +235,15 @@ angular.module('app.controllers', [])
 		}
 	};
 
+	$scope.enableDelete = function(){
+		$scope.isRemovable = true;
+		$scope.closePopover();
+	}
+
+	$scope.disableDelete = function(){
+		$scope.isRemovable = false;
+	}
+
 	$scope.removeGroup = function(group_key) {
 	    var isGroupAdmin = false;
 	    var user_email = Users.getEmail();
@@ -288,6 +297,7 @@ angular.module('app.controllers', [])
 	    else {
 	    	$scope.showAlert('Opps only admin can delete group!');
 	    }
+	    $scope.isRemovable = false;
 
     };
 
@@ -348,6 +358,7 @@ angular.module('app.controllers', [])
     };
 
     $scope.addNewGroup    = function() {
+    	$scope.closePopover();
      	$scope.newGroup = {};
 
  		var myPopup = $ionicPopup.show({
@@ -487,6 +498,27 @@ angular.module('app.controllers', [])
           console.log("An error happened -> " + error);
       });
 		};
+
+
+	$ionicPopover.fromTemplateUrl('popover.html', {
+      scope: $scope
+   	}).then(function(popover) {
+      $scope.popover = popover;
+   	});
+
+	$scope.openPopover = function($event) {
+	  $scope.popover.show($event);
+	};
+
+	$scope.closePopover = function() {
+	  $scope.popover.hide();
+	};
+
+	//Cleanup the popover when we're done with it!
+	$scope.$on('$destroy', function() {
+	  $scope.popover.remove();
+	});
+
 })
 
 .controller('groupListMemberController', function($scope, $stateParams, $ionicPopup, Users) {
