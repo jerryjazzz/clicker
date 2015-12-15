@@ -3,13 +3,18 @@
 
         <section class = "home-container" >
 
-            <div class="row header" style="background: url(img/login_bg.png) no-repeat center; background-size:100%">
+            <div class="row header" style="background: url(img/login_bg.png) no-repeat center; background-size:100%"></div>
 
-            </div>
-
-            <div class = "row icon-row">
-                <div class="col-80 col-offset-10">
-                    
+            <div class="row icon-row">
+                <div class="col-80 col-offset-10"> 
+                    <div class="row"> 
+                        <div class="col text-center">
+                            <a href="" class="button icon ion-social-facebook button-outline button-block button-positive" ng-click="loginWithFacebook()"></a>
+                        </div>
+                        <div class="col text-center">
+                            <a href="" class="button icon ion-social-googleplus button-outline button-block button-assertive" ng-click="loginWithGooglePlus()"></a>
+                        </div>
+                    </div> 
                     <form class="list">
                         <ion-list>
                             <label class="item item-input">
@@ -19,22 +24,22 @@
                                 <input type="password" placeholder="Password" ng-model="userData.password">
                             </label>
                         </ion-list>
-                    
-                    
-                        <a href="" class="button button-positive button-block" ng-click="login(userData)">Log in</a>
-            <!--             <a href="" class="button icon ion-social-facebook button-positive button-block" ng-click="loginWithFacebook()">    Log in via Facebook
-                        </a> -->
-                        <a ui-sref="signup()" class="button button-assertive button-block">Sign Up</a>
-                    
-                        <div class="spacer" style="height: 10px;"></div>
-                    </form>
 
+                        <div class="row"> 
+                            <div class="col text-center">
+                                <a href="" class="button button-balanced button-block" ng-click="login(userData)">Log in</a>
+                            </div> 
+                            <div class="col text-center">
+                                <a ui-sref="signup()" class="button button-dark button-block">Sign Up</a>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
 
+            <div class="spacer text-center" style="height: 10px;"></div>
+        
         </section>
-
-
             
     </ion-content>
 </ion-view>
