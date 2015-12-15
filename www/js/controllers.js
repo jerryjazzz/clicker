@@ -81,6 +81,11 @@ angular.module('app.controllers', [])
 		});
 	};
 
+	//User login via Google Plus
+	$scope.loginWithGooglePlus = function() {
+		alert('Login with Google Plus');
+	};
+
 	$scope.loginErrorMessages = function(error) {
 		switch (error.code) {
 			case "INVALID_USER":
@@ -346,9 +351,10 @@ angular.module('app.controllers', [])
      	$scope.newGroup = {};
 
  		var myPopup = $ionicPopup.show({
-			template: '<input type="text" ng-model="newGroup.name">',
-			title: 'Add New Group',
-			subTitle: 'Please enter group name',
+			// template: '<input type="text" ng-model="newGroup.name">',
+			template: '<label class="item item-input"><input type="text" placeholder="Enter group name" ng-model="newGroup.name"></label><label class="item item-input"><input type="text" placeholder="Question" ng-model="newGroup.description"></label>',
+			title: 'New Group',
+			// subTitle: 'Please enter group name',
 			scope: $scope,
 			buttons: [
 				{
