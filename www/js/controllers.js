@@ -521,7 +521,7 @@ angular.module('app.controllers', [])
 
 })
 
-.controller('groupListMemberController', function($scope, $stateParams, $ionicPopup, Users) {
+.controller('groupListMemberController', function($scope, $stateParams, $ionicPopup, Users, $ionicActionSheet) {
 	$scope.group_name = $stateParams.grp_name;
 	var group_key = $stateParams.grp_key;
 	$scope.listOfAllGroupMembers = [];
@@ -609,6 +609,84 @@ angular.module('app.controllers', [])
 			template: message
 		});
     };
+
+    $scope.addProfilePic = function (){	
+		$ionicActionSheet.show({
+		    buttons: [
+		       { text: '<div class="button-block text-center">Take Photo</div>' }, 
+		       { text: '<div class="button-block text-center">Choose from Photos</div>'}
+		    ],
+		    // destructiveText: 'Delete',
+		    // titleText: '<div class="text-center">Complete action by</div>',
+		    cancelText: 'Cancel',
+		    cancel: function() {
+				console.log('CANCELLED');
+			},
+		    buttonClicked: function(index) {
+		     	switch (index)
+		     	{
+					case 0 :
+						//Handle Share Button
+						return true;
+					case 1 :
+						//Handle Move Button
+						return true;
+				}
+				return true;
+		    }
+		   });
+    };
+
+    //Camera function
+	$scope.takePic = function() {
+		$scope.picOptionModal.hide();
+		var options =   {
+			quality : 80,
+			destinationType : Camera.DestinationType.DATA_URL,
+			sourceType : Camera.PictureSourceType.CAMERA,
+			allowEdit : true,
+			encodingType: Camera.EncodingType.JPEG,
+			popoverOptions: CameraPopoverOptions,
+			targetWidth: 500,
+			targetHeight: 300,
+			//saveToPhotoAlbum: true
+		}
+		navigator.camera.getPicture(onSuccess,onFail,options);
+	}
+	var onSuccess = function(DATA_URL) {
+		console.log(DATA_URL);
+		$scope.imgURI= DATA_URL;
+		$scope.$digest();
+	};
+
+	var onFail = function(e) {
+		console.log("On fail " + e);
+	}
+
+	$scope.choosefrmGallery = function() {
+		$scope.picOptionModal.hide();
+		var options =   {
+			quality : 80,
+			destinationType : Camera.DestinationType.DATA_URL,
+			sourceType : Camera.PictureSourceType.PHOTOLIBRARY,
+			allowEdit : true,
+			encodingType: Camera.EncodingType.JPEG,
+			popoverOptions: CameraPopoverOptions,
+			targetWidth: 500,
+			targetHeight: 300,
+			//saveToPhotoAlbum: true
+		}
+		navigator.camera.getPicture(onSuccess,onFail,options);
+	}
+	var onSuccess = function(DATA_URL) {
+		console.log(DATA_URL);
+		$scope.imgURI= DATA_URL;
+		$scope.$digest();
+	};
+
+	var onFail = function(e) {
+		console.log("On fail " + e);
+	}
 })
 
 .controller('groupController', function($scope, $stateParams, $ionicModal, $timeout, $ionicPopup, Users, $ionicPopover) {
@@ -974,6 +1052,3 @@ angular.module('app.controllers', [])
 
 })
 
-// QR Code Encoding
-
- // QR Code Decoding

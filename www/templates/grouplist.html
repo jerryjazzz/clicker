@@ -40,11 +40,13 @@
       <div class="item item-icon-right item-text-wrap" >
         <div ng-show="isRemovable" class="icon ion-android-remove-circle assertive" ng-click="removeGroup(group.group_key)">
         </div>
-        <div ui-sref="group({grp_key: group.group_key, grp_name: group.group_name})">
           
+        <div ui-sref="grouplistmember({grp_key: group.group_key, grp_name: group.group_name})">
           <h2>{{group.group_name}}</h2>
           <p>{{group.group_member_count}} member(s)</p>
-
+        </div>
+        
+        <div ui-sref="group({grp_key: group.group_key, grp_name: group.group_name})">
           <div class="item">
             <h1 style="color:grey;">
               Q:

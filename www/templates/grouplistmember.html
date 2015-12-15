@@ -1,29 +1,35 @@
 <ion-view title="{{group_name}}">
     <ion-content padding="false" class="has-header">
       
+
+<!-- 
+      <img  class="resize" src="img\question_mark.jpg" ng-click="showpicOptionModal()" ng-if="!myRestaurantData.image && !imgURI">
+      <img class="resize" ng-src="data:image/jpeg;base64,{{::myRestaurantData.image}}" ng-click="showpicOptionModal()" ng-if="!imgURI && myRestaurantData.image">
+      <img class="resize" ng-src="data:image/jpeg;base64,{{::imgURI}}" ng-click="showpicOptionModal()" ng-if="imgURI"> -->
       <div class="item item-body">
         <div class="row">
-          <div class="col col-50 col-offset-25">
-            <img class="full-image" src="img\login_bg.png">
+          <div class="col col-50 col-offset-25" style="border-radius:10px; border: 2px solid #73AD21; padding: 20px; ">
+            <img class="full-image" src="img\avatar.png" ng-click="addProfilePic()">
           </div>
         </div>
         <div class="row">
           <div class="col col-50 col-offset-25 text text-center">
-            User
-            <span><i class="icon ion-ribbon-b"></i></span>
+            <h2>User</h2>
           </div>  
         </div>
       </div>
+    
 
-      <ion-list ng-repeat="member in listOfAllGroupMembers">
-        <ion-item class="item-icon-right">
-          <ion-option-button class="button-assertive" ng-click="removeGroupMember(member.member_key, member.user_key)">
-              <i class="ion-minus-circled"></i>
-          </ion-option-button>
-          <h2>{{member.user_name}}</h2>
-          <p>{{member.user_email}}</p>
-          <i ng-class="member.group_admin ? 'icon ion-ribbon-b' : ''"></i>
-        </ion-item>
-      </ion-list>
+
+    <ion-list ng-repeat="member in listOfAllGroupMembers">
+      <ion-item class="item-icon-right">
+        <ion-option-button class="button-assertive" ng-click="removeGroupMember(member.member_key, member.user_key)">
+            <i class="ion-minus-circled"></i>
+        </ion-option-button>
+        <h2>{{member.user_name}}</h2>
+        <p>{{member.user_email}}</p>
+        <i ng-class="member.group_admin ? 'icon ion-ribbon-b' : ''"></i>
+      </ion-item>
+    </ion-list>
     </ion-content>
 </ion-view>
