@@ -9104,3 +9104,6 @@ a.button {
 
 .icon-row {
   -webkit-align-items: center; }
+
+.platform-android .action-sheet-cancel {
+  display: block !important; }

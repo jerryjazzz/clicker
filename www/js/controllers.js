@@ -1,6 +1,6 @@
 angular.module('app.controllers', [])
 
-.controller('loginController', function($scope, $rootScope, $state, $http, Popup, Users) {
+.controller('loginController', function($scope, $rootScope, $state, $http, Popup, Users, $ionicHistory) {
 	$scope.login = function(userData) {
 	    $rootScope.show('Loading...');
 
@@ -35,6 +35,10 @@ angular.module('app.controllers', [])
 	        //Save Firebase user name
 	        Users.setUserName(authData.uid);
 
+	      	// disable back button
+            $ionicHistory.nextViewOptions({
+			 disableBack: true
+			});
 	        $state.go("grouplist");
 	      }
 	    });
@@ -74,7 +78,12 @@ angular.module('app.controllers', [])
 	        Users.setUserName(authData.uid);
 
 		    $rootScope.hide();
-		    $state.go("grouplist");
+
+		    // disable back button
+            $ionicHistory.nextViewOptions({
+			 disableBack: true
+			});
+	        $state.go("grouplist");
 		  }
 		}, {
 		  scope: "email,user_likes,user_friends"
@@ -116,7 +125,7 @@ angular.module('app.controllers', [])
 	};
 })
 
-.controller('signupController', function($scope, $rootScope, $state, Popup, Users) {
+.controller('signupController', function($scope, $rootScope, $state, Popup, Users, $ionicHistory) {
 
 	$scope.signup = function(userData) {
 
@@ -169,6 +178,11 @@ angular.module('app.controllers', [])
 
 	            $rootScope.hide();
 	            console.log("Authenticated successfully with payload:", authData);
+	            
+	            // disable back button
+	            $ionicHistory.nextViewOptions({
+				 disableBack: true
+				});
 	            $state.go("grouplist");
 	          }
 	        });
@@ -618,18 +632,17 @@ angular.module('app.controllers', [])
 		    ],
 		    // destructiveText: 'Delete',
 		    // titleText: '<div class="text-center">Complete action by</div>',
-		    cancelText: 'Cancel',
+		    cancelText: '<div class="button-block text-center">Cancel</div>',
 		    cancel: function() {
-				console.log('CANCELLED');
 			},
 		    buttonClicked: function(index) {
 		     	switch (index)
 		     	{
 					case 0 :
-						//Handle Share Button
+						$scope.takePic();
 						return true;
 					case 1 :
-						//Handle Move Button
+						$scope.choosefrmGallery();
 						return true;
 				}
 				return true;
@@ -637,56 +650,47 @@ angular.module('app.controllers', [])
 		   });
     };
 
-    //Camera function
 	$scope.takePic = function() {
-		$scope.picOptionModal.hide();
 		var options =   {
 			quality : 80,
 			destinationType : Camera.DestinationType.DATA_URL,
 			sourceType : Camera.PictureSourceType.CAMERA,
 			allowEdit : true,
-			encodingType: Camera.EncodingType.JPEG,
+			encodingType: Camera.EncodingType.PNG,
 			popoverOptions: CameraPopoverOptions,
 			targetWidth: 500,
 			targetHeight: 300,
-			//saveToPhotoAlbum: true
+			saveToPhotoAlbum: false
 		}
-		navigator.camera.getPicture(onSuccess,onFail,options);
-	}
-	var onSuccess = function(DATA_URL) {
-		console.log(DATA_URL);
-		$scope.imgURI= DATA_URL;
-		$scope.$digest();
+		navigator.camera.getPicture(function(DATA_URL) {
+			console.log(DATA_URL);
+			$scope.imgURI= DATA_URL;
+			$scope.$digest();
+		}, function (e) {
+			console.log("On fail " + e);	
+		},options);
 	};
 
-	var onFail = function(e) {
-		console.log("On fail " + e);
-	}
-
 	$scope.choosefrmGallery = function() {
-		$scope.picOptionModal.hide();
 		var options =   {
 			quality : 80,
 			destinationType : Camera.DestinationType.DATA_URL,
 			sourceType : Camera.PictureSourceType.PHOTOLIBRARY,
 			allowEdit : true,
-			encodingType: Camera.EncodingType.JPEG,
+			encodingType: Camera.EncodingType.PNG,
 			popoverOptions: CameraPopoverOptions,
 			targetWidth: 500,
 			targetHeight: 300,
-			//saveToPhotoAlbum: true
+			saveToPhotoAlbum: false
 		}
-		navigator.camera.getPicture(onSuccess,onFail,options);
-	}
-	var onSuccess = function(DATA_URL) {
-		console.log(DATA_URL);
-		$scope.imgURI= DATA_URL;
-		$scope.$digest();
+		navigator.camera.getPicture(function(DATA_URL) {
+			console.log(DATA_URL);
+			$scope.imgURI= DATA_URL;
+			$scope.$digest();
+		},function(e) {
+			console.log("On fail " + e);
+		},options);
 	};
-
-	var onFail = function(e) {
-		console.log("On fail " + e);
-	}
 })
 
 .controller('groupController', function($scope, $stateParams, $ionicModal, $timeout, $ionicPopup, Users, $ionicPopover) {
