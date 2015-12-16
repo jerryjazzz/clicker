@@ -37,8 +37,9 @@ angular.module('app.controllers', [])
 
 	      	// disable back button
             $ionicHistory.nextViewOptions({
-			 disableBack: true
+				disableBack: true
 			});
+
 	        $state.go("grouplist");
 	      }
 	    });
@@ -81,8 +82,9 @@ angular.module('app.controllers', [])
 
 		    // disable back button
             $ionicHistory.nextViewOptions({
-			 disableBack: true
+				disableBack: true
 			});
+
 	        $state.go("grouplist");
 		  }
 		}, {
@@ -91,8 +93,37 @@ angular.module('app.controllers', [])
 	};
 
 	//User login via Google Plus
-	$scope.loginWithGooglePlus = function() {
-		alert('Login with Google Plus');
+	$scope.loginWithGoogle = function() {
+		$rootScope.show('Loading...');
+		fb.authWithOAuthPopup("google", function(error, authData) {
+			if (error) {
+				$rootScope.hide();
+				console.log("Login Failed!", error);
+				$scope.loginErrorMessages(error);
+			} else {
+				console.log("Authenticated successfully with payload:", authData);
+
+				Users.newUser(authData.uid, authData.google.displayName, authData.google.email);
+
+				//To save the user's email in the factory which will later be used for group filtering
+				Users.setEmail(authData.google.email);
+				//Save Firebase user key
+				Users.setUserKey(authData.uid);
+				//Save Firebase user name
+				Users.setUserName(authData.uid);
+
+				$rootScope.hide();
+
+				// disable back button
+				$ionicHistory.nextViewOptions({
+					disableBack: true
+				});
+
+				$state.go("grouplist");
+			}
+		  }, {
+		  scope: "email"
+		});
 	};
 
 	$scope.loginErrorMessages = function(error) {
@@ -208,7 +239,7 @@ angular.module('app.controllers', [])
 	$scope.save   = function(group) {
 		// save the group
 		if(group) {
-			if(group.name) {
+			if(group.name && group.description) {
 				//Insert the new group in the firebase
 				var user_email = Users.getEmail();
 				var user_key = Users.getUserKey();
@@ -217,6 +248,7 @@ angular.module('app.controllers', [])
 				var newGroupRef = fb.child("groups");
 				newGroupRef = newGroupRef.push({
 					group_name: group.name,
+					group_desc: group.description,
 					group_creator: user_email,
 					created_dt: Date.now()
 				});
@@ -392,7 +424,7 @@ angular.module('app.controllers', [])
 					text: '<b>Save</b>',
 					type: 'button-positive',
 					onTap: function(e) {
-						if (!$scope.newGroup.name) {
+						if (!$scope.newGroup.name || !$scope.newGroup.description) {
 							//don't allow the user to close unless he enters wifi password
 							e.preventDefault();
 						} else {
@@ -694,6 +726,7 @@ angular.module('app.controllers', [])
 
 .controller('groupController', function($scope, $stateParams, $ionicModal, $timeout, $ionicPopup, Users, $ionicPopover) {
 	var user_email = Users.getEmail();
+	var user_name = Users.getUserName();
 	var group_key = $stateParams.grp_key;
 	$scope.group_name = $stateParams.grp_name;
 	$scope.grp_key = group_key;
@@ -822,6 +855,7 @@ angular.module('app.controllers', [])
 
 					groupRef = groupRef.push({
 						name: item.name,
+						author: user_name,
 						votes: 0
 					});
 

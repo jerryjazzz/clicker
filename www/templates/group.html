@@ -21,7 +21,7 @@
           <div class="item item-avatar item-icon-right item-text-wrap" ng-click="vote(groupItem.group_item_key)">
             <img src="">
             <h2>Ans: {{groupItem.name}}</h2>
-            <p>by Sem</p>
+            <p>by {{groupItem.author}}</p>
             <i ng-class="groupItem.voted ? 'icon ion-android-checkbox-outline balanced' : 'icon ion-android-checkbox-outline-blank'"></i>
           </div>
 
