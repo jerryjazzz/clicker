@@ -661,7 +661,7 @@ angular.module('app.controllers', [])
 			targetWidth: 500,
 			targetHeight: 300,
 			saveToPhotoAlbum: false
-		}
+		};
 		navigator.camera.getPicture(function(DATA_URL) {
 			console.log(DATA_URL);
 			$scope.imgURI= DATA_URL;
@@ -682,9 +682,8 @@ angular.module('app.controllers', [])
 			targetWidth: 500,
 			targetHeight: 300,
 			saveToPhotoAlbum: false
-		}
+		};
 		navigator.camera.getPicture(function(DATA_URL) {
-			console.log(DATA_URL);
 			$scope.imgURI= DATA_URL;
 			$scope.$digest();
 		},function(e) {
