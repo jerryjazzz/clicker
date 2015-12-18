@@ -6,7 +6,6 @@
 	</ion-nav-buttons> -->
 
   <ion-nav-buttons side="right">
-      <!-- <button ng-show="!isRemovable" class="button button-icon" ng-click = "openPopover($event)"> -->
       <button ng-show="!isRemovable" class="button button-icon" ng-click = "showActionSheet()">
         <i class="icon ion-android-more-horizontal"></i>
       </button>
@@ -21,34 +20,22 @@
 
     <div class="list card" ng-repeat="group in listOfAllGroups">
       <div class="item item-icon-right item-text-wrap" >
-        <div ng-show="isRemovable" class="icon ion-android-remove-circle assertive" ng-click="removeGroup(group.group_key)">
-        </div>
-
+        <div ng-show="isRemovable" class="icon ion-android-remove-circle assertive" ng-click="removeGroup(group.group_key)"></div>
         <div ui-sref="grouplistmember({grp_key: group.group_key, grp_name: group.group_name})">
           <h2>{{group.group_name}}</h2>
           <p>{{group.group_member_count}} member(s)</p>
         </div>
+      </div>
 
+      <div class="item">
         <div ui-sref="group({grp_key: group.group_key, grp_name: group.group_name})">
-          <div class="item">
-            <h1 style="color:grey;">
-              Q:
-            </h1>
-            <h2>{{group.group_desc}}</h2>
-          </div>
+          <h1 style="color:grey;">
+            Q:
+          </h1>
+          <h2>{{group.group_desc}}</h2>
         </div>
       </div>
+
     </div>
   </ion-content>
 </ion-view>
-
-<script id = "popover.html" type = "text/ng-template">
-   <ion-popover-view>
-      <ion-content>
-        <ion-list>
-          <ion-item class="item item-icon-right" ng-click="addNewGroup()"><i class="icon ion-android-add-circle"></i>Add</ion-item>
-          <ion-item class="item item-icon-right" ng-click="enableDelete()"><i class="icon ion-android-delete"></i>Delete</ion-item>
-        </ion-list>
-      </ion-content>
-   </ion-popover-view>
-</script>

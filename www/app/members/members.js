@@ -1,0 +1,173 @@
+angular.module('app.members', [])
+
+.controller('groupListMemberController', function($scope, $stateParams,
+	$ionicPopup, Users, $ionicActionSheet) {
+
+	var group_key = $stateParams.grp_key;
+
+	$scope.group_name = $stateParams.grp_name;
+
+	$scope.listOfAllGroupMembers = [];
+
+	var groupMemberRef = fb.child("groups").child(group_key).child("group_member");
+
+	groupMemberRef.on("value", function(snapshot) {
+		$scope.listOfAllGroupMembers = [];
+
+		snapshot.forEach(function(childSnapShot) {
+			var groupMember = childSnapShot.val();
+			groupMember.member_key = childSnapShot.key();
+
+			$scope.listOfAllGroupMembers.push(groupMember);
+		});
+	});
+
+	$scope.removeGroupMember = function(member_key, user_key) {
+		var chkIsGroupAdmin = false;
+		var loginUserKey = Users.getUserKey();
+
+		for(var i=0; i<$scope.listOfAllGroupMembers.length; i++)
+		{
+			if(loginUserKey == $scope.listOfAllGroupMembers[i].user_key)
+			{
+				if($scope.listOfAllGroupMembers[i].group_admin) {
+					chkIsGroupAdmin = true;
+				}
+			}
+		}
+
+		if(chkIsGroupAdmin) {
+			// To check if the user has accidentally deleted him/herself
+			if(loginUserKey != user_key) {
+
+				var confirmPopup = $ionicPopup.confirm({
+					title: 'Clicker',
+					template: 'Are you sure you want to delete this user from the group?'
+				});
+
+				confirmPopup.then(function(confirm) {
+					// If user confirm to drop the user from the group
+					if(confirm)
+					{
+						// Remove group from user entity
+						var userRef = fb.child("users").child(user_key).child("group_list");
+						userRef.once("value", function(snapshot) {
+							snapshot.forEach(function(childSnapShot) {
+								var userGroupList = childSnapShot.val();
+
+								if(group_key == userGroupList.group_key)
+								{
+									var userGroupListRef = fb.child("users").child(user_key).child("group_list").child(childSnapShot.key());
+									userGroupListRef.remove();
+
+									//Remove member from group entity
+									var groupMemberRef = fb.child("groups").child(group_key).child("group_member").child(member_key);
+									groupMemberRef.remove();
+
+									//Deduct member count
+									var groupRef = fb.child("groups").child(group_key);
+									groupRef.once("value", function(snapshot) {
+										var group = snapshot.val();
+
+										groupRef.update({
+											group_member_count: group.group_member_count - 1
+										});
+
+									});
+								}
+							});
+						});
+					}
+				});
+			}
+			else {
+				$scope.showAlert("Invalid Operation");
+			}
+		}
+		else {
+			$scope.showAlert("Opps! Only group admin is allowed to perform this operation.");
+		}
+	};
+
+  $scope.showAlert = function(message) {
+		var alertPopup = $ionicPopup.alert({
+			title: 'Clicker',
+			template: message
+		});
+  };
+
+  $scope.showActionSheet = function()	{
+		$ionicActionSheet.show({
+		    buttons: [
+		       { text: '<div class="button-block text-center">Take Photo</div>' },
+		       { text: '<div class="button-block text-center">Choose from Photos</div>'},
+					 { text: '<div class="button-block text-center">Edit Description</div>'}
+		    ],
+		    // destructiveText: 'Delete',
+		    // titleText: '<div class="text-center">Complete action by</div>',
+		    cancelText: '<div class="button-block text-center">Cancel</div>',
+		    cancel: function() {
+				},
+		    buttonClicked: function(index) {
+		     	switch (index)
+		     	{
+					case 0 :
+						$scope.takePic();
+						return true;
+					case 1 :
+						$scope.choosefrmGallery();
+						return true;
+					case 2 :
+						$scope.updateDescription();
+						return true;
+				}
+				return true;
+		    }
+	   });
+  };
+
+	$scope.takePic = function() {
+		var options =   {
+			quality : 80,
+			destinationType : Camera.DestinationType.DATA_URL,
+			sourceType : Camera.PictureSourceType.CAMERA,
+			allowEdit : true,
+			encodingType: Camera.EncodingType.PNG,
+			popoverOptions: CameraPopoverOptions,
+			targetWidth: 500,
+			targetHeight: 300,
+			saveToPhotoAlbum: false
+		};
+		navigator.camera.getPicture(function(DATA_URL) {
+			console.log(DATA_URL);
+			$scope.imgURI= DATA_URL;
+			$scope.$digest();
+		}, function (e) {
+			console.log("On fail " + e);
+		},options);
+	};
+
+	$scope.choosefrmGallery = function() {
+		var options =   {
+			quality : 80,
+			destinationType : Camera.DestinationType.DATA_URL,
+			sourceType : Camera.PictureSourceType.PHOTOLIBRARY,
+			allowEdit : true,
+			encodingType: Camera.EncodingType.PNG,
+			popoverOptions: CameraPopoverOptions,
+			targetWidth: 500,
+			targetHeight: 300,
+			saveToPhotoAlbum: false
+		};
+		navigator.camera.getPicture(function(DATA_URL) {
+			$scope.imgURI= DATA_URL;
+			$scope.$digest();
+		},function(e) {
+			console.log("On fail " + e);
+		},options);
+	};
+
+	$scope.updateDescription = function() {
+		alert('edit description');
+	};
+})

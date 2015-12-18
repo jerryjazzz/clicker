@@ -6,7 +6,7 @@ var fb = new Firebase("https://clickerprj.firebaseio.com/");
 
 
 angular.module('app', ['ionic', 'app.controllers', 'app.login',
-'app.signup','app.services', 'firebase','monospaced.qrcode','ngCordova'])
+'app.signup', 'app.members','app.services', 'firebase','monospaced.qrcode','ngCordova'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -61,7 +61,7 @@ angular.module('app', ['ionic', 'app.controllers', 'app.login',
     })
     .state('grouplistmember', {
       url: '/grouplistmember',
-      templateUrl: 'templates/grouplistmember.html',
+      templateUrl: 'app/members/members.html',
       controller: 'groupListMemberController',
       params: {
         grp_key: null,
