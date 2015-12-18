@@ -4,14 +4,10 @@
 		  <i class="icon ion-qr-scanner"></i>
 		</button>
 	</ion-nav-buttons> -->
-<!-- 	<ion-nav-buttons side="right">
-		<button class="button button-icon" ng-click="addNewGroup()">
-		  <i class="icon ion-android-add-circle"></i>
-		</button>
-	</ion-nav-buttons> -->
-  
+
   <ion-nav-buttons side="right">
-      <button ng-show="!isRemovable" class="button button-icon" ng-click = "openPopover($event)">
+      <!-- <button ng-show="!isRemovable" class="button button-icon" ng-click = "openPopover($event)"> -->
+      <button ng-show="!isRemovable" class="button button-icon" ng-click = "showActionSheet()">
         <i class="icon ion-android-more-horizontal"></i>
       </button>
       <button ng-show="isRemovable" class="button button-icon" ng-click = "disableDelete()">
@@ -23,35 +19,21 @@
     <ion-refresher spinner="ripple" on-refresh="refresh()">
     </ion-refresher>
 
-<!--       <ion-list ng-repeat="group in listOfAllGroups">
-        <ion-item ui-sref="group({grp_key: group.group_key, grp_name: group.group_name})">
-          <ion-option-button class="button-calm" ui-sref="grouplistmember({grp_key: group.group_key, grp_name: group.group_name})">
-              <i class="ion-clipboard"></i>
-          </ion-option-button>
-          <ion-option-button class="button-assertive" ng-click="removeGroup(group.group_key)">
-              <i class="ion-minus-circled"></i>
-          </ion-option-button>
-          <h2>{{group.group_name}}</h2>
-          <p>{{group.group_member_count}} member(s)</p>
-        </ion-item>
-	    </ion-list> -->
-
     <div class="list card" ng-repeat="group in listOfAllGroups">
       <div class="item item-icon-right item-text-wrap" >
         <div ng-show="isRemovable" class="icon ion-android-remove-circle assertive" ng-click="removeGroup(group.group_key)">
         </div>
-          
+
         <div ui-sref="grouplistmember({grp_key: group.group_key, grp_name: group.group_name})">
           <h2>{{group.group_name}}</h2>
           <p>{{group.group_member_count}} member(s)</p>
         </div>
-        
+
         <div ui-sref="group({grp_key: group.group_key, grp_name: group.group_name})">
           <div class="item">
             <h1 style="color:grey;">
               Q:
             </h1>
-            <!--<h2>What features do you think should be in Clicker 2.0?</h2>-->
             <h2>{{group.group_desc}}</h2>
           </div>
         </div>

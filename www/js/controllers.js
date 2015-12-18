@@ -209,7 +209,7 @@ angular.module('app.controllers', [])
 
 	            $rootScope.hide();
 	            console.log("Authenticated successfully with payload:", authData);
-	            
+
 	            // disable back button
 	            $ionicHistory.nextViewOptions({
 				 disableBack: true
@@ -223,7 +223,7 @@ angular.module('app.controllers', [])
 	};
 })
 
-.controller('groupListController', function($scope, Users, $timeout, $ionicPopup, $cordovaBarcodeScanner, $timeout, $ionicPopover) {
+.controller('groupListController', function($scope, Users, $timeout, $ionicPopup, $cordovaBarcodeScanner, $timeout,  $ionicActionSheet) {
 	$scope.$on('$ionicView.enter', function(){
 			console.log(Users.getUserName());
 			$scope.refresh();
@@ -283,7 +283,6 @@ angular.module('app.controllers', [])
 
 	$scope.enableDelete = function(){
 		$scope.isRemovable = true;
-		$scope.closePopover();
 	}
 
 	$scope.disableDelete = function(){
@@ -404,7 +403,6 @@ angular.module('app.controllers', [])
     };
 
     $scope.addNewGroup    = function() {
-    	$scope.closePopover();
      	$scope.newGroup = {};
 
  		var myPopup = $ionicPopup.show({
@@ -433,7 +431,7 @@ angular.module('app.controllers', [])
 					}
 				}
 			]
-		});	
+		});
 
      	myPopup.then(function(newGroup) {
      		$scope.save(newGroup);
@@ -545,26 +543,29 @@ angular.module('app.controllers', [])
       });
 		};
 
-
-	$ionicPopover.fromTemplateUrl('popover.html', {
-      scope: $scope
-   	}).then(function(popover) {
-      $scope.popover = popover;
-   	});
-
-	$scope.openPopover = function($event) {
-	  $scope.popover.show($event);
-	};
-
-	$scope.closePopover = function() {
-	  $scope.popover.hide();
-	};
-
-	//Cleanup the popover when we're done with it!
-	$scope.$on('$destroy', function() {
-	  $scope.popover.remove();
-	});
-
+		$scope.showActionSheet = function (){
+			$ionicActionSheet.show({
+		    buttons: [
+		       { text: '<div class="button-block text-center">New Clicker Topic</div>' },
+		       { text: '<div class="button-block text-center">Delete Clicker Topic</div>'}
+		    ],
+		    cancelText: '<div class="button-block text-center assertive">Cancel</div>',
+		    cancel: function() {
+			},
+		    buttonClicked: function(index) {
+		     	switch (index)
+		     	{
+					case 0 :
+						$scope.addNewGroup();
+						return true;
+					case 1 :
+						$scope.enableDelete();
+						return true;
+				}
+				return true;
+		    }
+		   });
+    };
 })
 
 .controller('groupListMemberController', function($scope, $stateParams, $ionicPopup, Users, $ionicActionSheet) {
@@ -656,10 +657,10 @@ angular.module('app.controllers', [])
 		});
     };
 
-    $scope.addProfilePic = function (){	
+    $scope.addProfilePic = function (){
 		$ionicActionSheet.show({
 		    buttons: [
-		       { text: '<div class="button-block text-center">Take Photo</div>' }, 
+		       { text: '<div class="button-block text-center">Take Photo</div>' },
 		       { text: '<div class="button-block text-center">Choose from Photos</div>'}
 		    ],
 		    // destructiveText: 'Delete',
@@ -699,7 +700,7 @@ angular.module('app.controllers', [])
 			$scope.imgURI= DATA_URL;
 			$scope.$digest();
 		}, function (e) {
-			console.log("On fail " + e);	
+			console.log("On fail " + e);
 		},options);
 	};
 
@@ -1088,4 +1089,3 @@ angular.module('app.controllers', [])
    });
 
 })
-
