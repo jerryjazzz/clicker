@@ -1,228 +1,5 @@
 angular.module('app.controllers', [])
 
-.controller('loginController', function($scope, $rootScope, $state, $http, Popup, Users, $ionicHistory) {
-	$scope.login = function(userData) {
-	    $rootScope.show('Loading...');
-
-	    if(!userData) {
-			$rootScope.notify("Please enter all the credentials");
-			$rootScope.hide();
-			return false;
-	    }
-	    if(!userData.email || !userData.password) {
-			$rootScope.notify("Please enter all the credentials");
-			$rootScope.hide();
-			return false;
-	    }
-
-	    //Log user into the system
-	    fb.authWithPassword({
-	      email    : userData.email,
-	      password : userData.password
-	    }, function(error, authData) {
-	      if (error) {
-	        $rootScope.hide();
-	        console.log(error.code);
-	        $scope.loginErrorMessages(error);
-
-	      } else {
-	        $rootScope.hide();
-	        console.log("Authenticated successfully with payload:", authData);
-	        //To save the user's email in the factory which will later be used for group filtering
-	        Users.setEmail(userData.email);
-	        //Save Firebase user key
-	        Users.setUserKey(authData.uid);
-	        //Save Firebase user name
-	        Users.setUserName(authData.uid);
-
-	      	// disable back button
-            $ionicHistory.nextViewOptions({
-				disableBack: true
-			});
-
-	        $state.go("grouplist");
-	      }
-	    });
-	    //End
-	};
-
-	//User login via facebook
-	$scope.loginWithFacebook = function() {
-		$rootScope.show('Loading...');
-		fb.authWithOAuthPopup("facebook", function(error, authData) {
-		  if (error) {
-		    $rootScope.hide();
-		    console.log("Login Failed!", error);
-		    $scope.loginErrorMessages(error);
-		  } else {
-		    console.log("Authenticated successfully with payload:", authData);
-		    //console.log(authData.facebook.accessToken);
-		    var fb_accToken = authData.facebook.accessToken;
-
-		    // Get data via facebook graph API
-		    $http.get('https://graph.facebook.com/'+ authData.facebook.id +'/friends?fields=id,name,birthday&access_token='+fb_accToken).
-		    then(function(data) {
-		      //console.log(data.data.data[0].name);
-
-		      //Insert user profile into Firebase
-		      Users.newUser(authData.uid, authData.facebook.displayName, authData.facebook.email);
-		    }), (function(data) {
-		      console.log("Data Failed: " + data);
-		    });
-		    //End
-
-		    //To save the user's email in the factory which will later be used for group filtering
-		    Users.setEmail(authData.facebook.email);
-		    //Save Firebase user key
-	        Users.setUserKey(authData.uid);
-	        //Save Firebase user name
-	        Users.setUserName(authData.uid);
-
-		    $rootScope.hide();
-
-		    // disable back button
-            $ionicHistory.nextViewOptions({
-				disableBack: true
-			});
-
-	        $state.go("grouplist");
-		  }
-		}, {
-		  scope: "email,user_likes,user_friends"
-		});
-	};
-
-	//User login via Google Plus
-	$scope.loginWithGoogle = function() {
-		$rootScope.show('Loading...');
-		fb.authWithOAuthPopup("google", function(error, authData) {
-			if (error) {
-				$rootScope.hide();
-				console.log("Login Failed!", error);
-				$scope.loginErrorMessages(error);
-			} else {
-				console.log("Authenticated successfully with payload:", authData);
-
-				Users.newUser(authData.uid, authData.google.displayName, authData.google.email);
-
-				//To save the user's email in the factory which will later be used for group filtering
-				Users.setEmail(authData.google.email);
-				//Save Firebase user key
-				Users.setUserKey(authData.uid);
-				//Save Firebase user name
-				Users.setUserName(authData.uid);
-
-				$rootScope.hide();
-
-				// disable back button
-				$ionicHistory.nextViewOptions({
-					disableBack: true
-				});
-
-				$state.go("grouplist");
-			}
-		  }, {
-		  scope: "email"
-		});
-	};
-
-	$scope.loginErrorMessages = function(error) {
-		switch (error.code) {
-			case "INVALID_USER":
-				console.log("The specified user account does not exist.");
-				$rootScope.hide();
-				$rootScope.notify('Error','Email or Password is incorrect!');
-				break;
-			case "INVALID_PASSWORD":
-				console.log("The specified user account password is incorrect.");
-				$rootScope.hide();
-				$rootScope.notify('Error','Email or Password is incorrect!');
-				break;
-			case "NETWORK_ERROR":
-				console.log("Network Error.");
-				$rootScope.hide();
-				$rootScope.notify('Error','An error occurred while attempting to contact the authentication server.');
-				break;
-			case "SERVICE_UNAVAILABLE":
-				console.log("Service Unavailable.");
-				$rootScope.hide();
-				$rootScope.notify('Error','Service is not available at this moment. Please try again later.');
-				break;
-			default:
-				console.log("Error login to application:", error);
-				$rootScope.hide();
-				$rootScope.notify('Error','Opps! Something went wrong!');
-		}
-	};
-})
-
-.controller('signupController', function($scope, $rootScope, $state, Popup, Users, $ionicHistory) {
-
-	$scope.signup = function(userData) {
-
-	    $rootScope.show('Loading...');
-
-	    if(!userData) {
-			$rootScope.notify("Please enter all the credentials");
-			$rootScope.hide();
-			return false;
-	    }
-
-		var name = userData.name;
-	    var email = userData.email;
-	    var psw = userData.password;
-
-		if(!name || !email || !psw) {
-			$rootScope.notify("Please enter all the credentials");
-			$rootScope.hide();
-			return false;
-		}
-
-	    fb.createUser({
-	      email    : userData.email,
-	      password : userData.password
-	    }, function(error, userData) {
-	      if (error) {
-	        $rootScope.hide();
-	        console.log("Error creating user:", error);
-	      } else {
-	        console.log("Successfully created user account with uid:", userData);
-	        //To insert a new user in Firebase
-	        Users.newUser(userData.uid, name, email);
-
-	        //Log user into the system
-	        fb.authWithPassword({
-	          email    : email,
-	          password : psw
-	        }, function(error, authData) {
-	          if (error) {
-	            $rootScope.hide();
-	            console.log("Login Failed!", error);
-	          } else {
-	            //To save the user's email in the factory which will later be used for group filtering
-	            Users.setEmail(email);
-	      	  	//Save Firebase user key
-	      	 	Users.setUserKey(userData.uid);
-	      	 	//Save Firebase user name
-				//$scope.setUserName(userData.uid);
-				Users.setUserName(userData.uid);
-
-	            $rootScope.hide();
-	            console.log("Authenticated successfully with payload:", authData);
-
-	            // disable back button
-	            $ionicHistory.nextViewOptions({
-				 disableBack: true
-				});
-	            $state.go("grouplist");
-	          }
-	        });
-	        //End
-	      }
-	    });
-	};
-})
-
 .controller('groupListController', function($scope, Users, $timeout, $ionicPopup, $cordovaBarcodeScanner, $timeout,  $ionicActionSheet) {
 	$scope.$on('$ionicView.enter', function(){
 			console.log(Users.getUserName());
@@ -1089,3 +866,228 @@ angular.module('app.controllers', [])
    });
 
 })
+
+
+
+// .controller('loginController', function($scope, $rootScope, $state, $http, Popup, Users, $ionicHistory) {
+// 	$scope.login = function(userData) {
+// 	    $rootScope.show('Loading...');
+//
+// 	    if(!userData) {
+// 			$rootScope.notify("Please enter all the credentials");
+// 			$rootScope.hide();
+// 			return false;
+// 	    }
+// 	    if(!userData.email || !userData.password) {
+// 			$rootScope.notify("Please enter all the credentials");
+// 			$rootScope.hide();
+// 			return false;
+// 	    }
+//
+// 	    //Log user into the system
+// 	    fb.authWithPassword({
+// 	      email    : userData.email,
+// 	      password : userData.password
+// 	    }, function(error, authData) {
+// 	      if (error) {
+// 	        $rootScope.hide();
+// 	        console.log(error.code);
+// 	        $scope.loginErrorMessages(error);
+//
+// 	      } else {
+// 	        $rootScope.hide();
+// 	        console.log("Authenticated successfully with payload:", authData);
+// 	        //To save the user's email in the factory which will later be used for group filtering
+// 	        Users.setEmail(userData.email);
+// 	        //Save Firebase user key
+// 	        Users.setUserKey(authData.uid);
+// 	        //Save Firebase user name
+// 	        Users.setUserName(authData.uid);
+//
+// 	      	// disable back button
+//             $ionicHistory.nextViewOptions({
+// 				disableBack: true
+// 			});
+//
+// 	        $state.go("grouplist");
+// 	      }
+// 	    });
+// 	    //End
+// 	};
+//
+// 	//User login via facebook
+// 	$scope.loginWithFacebook = function() {
+// 		$rootScope.show('Loading...');
+// 		fb.authWithOAuthPopup("facebook", function(error, authData) {
+// 		  if (error) {
+// 		    $rootScope.hide();
+// 		    console.log("Login Failed!", error);
+// 		    $scope.loginErrorMessages(error);
+// 		  } else {
+// 		    console.log("Authenticated successfully with payload:", authData);
+// 		    //console.log(authData.facebook.accessToken);
+// 		    var fb_accToken = authData.facebook.accessToken;
+//
+// 		    // Get data via facebook graph API
+// 		    $http.get('https://graph.facebook.com/'+ authData.facebook.id +'/friends?fields=id,name,birthday&access_token='+fb_accToken).
+// 		    then(function(data) {
+// 		      //console.log(data.data.data[0].name);
+//
+// 		      //Insert user profile into Firebase
+// 		      Users.newUser(authData.uid, authData.facebook.displayName, authData.facebook.email);
+// 		    }), (function(data) {
+// 		      console.log("Data Failed: " + data);
+// 		    });
+// 		    //End
+//
+// 		    //To save the user's email in the factory which will later be used for group filtering
+// 		    Users.setEmail(authData.facebook.email);
+// 		    //Save Firebase user key
+// 	        Users.setUserKey(authData.uid);
+// 	        //Save Firebase user name
+// 	        Users.setUserName(authData.uid);
+//
+// 		    $rootScope.hide();
+//
+// 		    // disable back button
+//             $ionicHistory.nextViewOptions({
+// 				disableBack: true
+// 			});
+//
+// 	        $state.go("grouplist");
+// 		  }
+// 		}, {
+// 		  scope: "email,user_likes,user_friends"
+// 		});
+// 	};
+//
+// 	//User login via Google Plus
+// 	$scope.loginWithGoogle = function() {
+// 		$rootScope.show('Loading...');
+// 		fb.authWithOAuthPopup("google", function(error, authData) {
+// 			if (error) {
+// 				$rootScope.hide();
+// 				console.log("Login Failed!", error);
+// 				$scope.loginErrorMessages(error);
+// 			} else {
+// 				console.log("Authenticated successfully with payload:", authData);
+//
+// 				Users.newUser(authData.uid, authData.google.displayName, authData.google.email);
+//
+// 				//To save the user's email in the factory which will later be used for group filtering
+// 				Users.setEmail(authData.google.email);
+// 				//Save Firebase user key
+// 				Users.setUserKey(authData.uid);
+// 				//Save Firebase user name
+// 				Users.setUserName(authData.uid);
+//
+// 				$rootScope.hide();
+//
+// 				// disable back button
+// 				$ionicHistory.nextViewOptions({
+// 					disableBack: true
+// 				});
+//
+// 				$state.go("grouplist");
+// 			}
+// 		  }, {
+// 		  scope: "email"
+// 		});
+// 	};
+//
+// 	$scope.loginErrorMessages = function(error) {
+// 		switch (error.code) {
+// 			case "INVALID_USER":
+// 				console.log("The specified user account does not exist.");
+// 				$rootScope.hide();
+// 				$rootScope.notify('Error','Email or Password is incorrect!');
+// 				break;
+// 			case "INVALID_PASSWORD":
+// 				console.log("The specified user account password is incorrect.");
+// 				$rootScope.hide();
+// 				$rootScope.notify('Error','Email or Password is incorrect!');
+// 				break;
+// 			case "NETWORK_ERROR":
+// 				console.log("Network Error.");
+// 				$rootScope.hide();
+// 				$rootScope.notify('Error','An error occurred while attempting to contact the authentication server.');
+// 				break;
+// 			case "SERVICE_UNAVAILABLE":
+// 				console.log("Service Unavailable.");
+// 				$rootScope.hide();
+// 				$rootScope.notify('Error','Service is not available at this moment. Please try again later.');
+// 				break;
+// 			default:
+// 				console.log("Error login to application:", error);
+// 				$rootScope.hide();
+// 				$rootScope.notify('Error','Opps! Something went wrong!');
+// 		}
+// 	};
+// })
+
+// .controller('signupController', function($scope, $rootScope, $state, Popup, Users, $ionicHistory) {
+//
+// 	$scope.signup = function(userData) {
+//
+// 	    $rootScope.show('Loading...');
+//
+// 	    if(!userData) {
+// 			$rootScope.notify("Please enter all the credentials");
+// 			$rootScope.hide();
+// 			return false;
+// 	    }
+//
+// 		var name = userData.name;
+// 	    var email = userData.email;
+// 	    var psw = userData.password;
+//
+// 		if(!name || !email || !psw) {
+// 			$rootScope.notify("Please enter all the credentials");
+// 			$rootScope.hide();
+// 			return false;
+// 		}
+//
+// 	    fb.createUser({
+// 	      email    : userData.email,
+// 	      password : userData.password
+// 	    }, function(error, userData) {
+// 	      if (error) {
+// 	        $rootScope.hide();
+// 	        console.log("Error creating user:", error);
+// 	      } else {
+// 	        console.log("Successfully created user account with uid:", userData);
+// 	        //To insert a new user in Firebase
+// 	        Users.newUser(userData.uid, name, email);
+//
+// 	        //Log user into the system
+// 	        fb.authWithPassword({
+// 	          email    : email,
+// 	          password : psw
+// 	        }, function(error, authData) {
+// 	          if (error) {
+// 	            $rootScope.hide();
+// 	            console.log("Login Failed!", error);
+// 	          } else {
+// 	            //To save the user's email in the factory which will later be used for group filtering
+// 	            Users.setEmail(email);
+// 	      	  	//Save Firebase user key
+// 	      	 	Users.setUserKey(userData.uid);
+// 	      	 	//Save Firebase user name
+// 				//$scope.setUserName(userData.uid);
+// 				Users.setUserName(userData.uid);
+//
+// 	            $rootScope.hide();
+// 	            console.log("Authenticated successfully with payload:", authData);
+//
+// 	            // disable back button
+// 	            $ionicHistory.nextViewOptions({
+// 				 disableBack: true
+// 				});
+// 	            $state.go("grouplist");
+// 	          }
+// 	        });
+// 	        //End
+// 	      }
+// 	    });
+// 	};
+// })

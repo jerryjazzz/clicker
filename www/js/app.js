@@ -5,7 +5,8 @@ var fb = new Firebase("https://clickerprj.firebaseio.com/");
 //var fb = new Firebase("https://clicker-project-dev.firebaseio.com/");
 
 
-angular.module('app', ['ionic', 'app.controllers', 'app.services', 'firebase','monospaced.qrcode','ngCordova'])
+angular.module('app', ['ionic', 'app.controllers', 'app.login',
+'app.signup','app.services', 'firebase','monospaced.qrcode','ngCordova'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -40,12 +41,12 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'firebase','m
   $stateProvider
     .state('login', {
       url: '/login',
-      templateUrl: 'templates/login.html',
+      templateUrl: 'app/login/login.html',
       controller: 'loginController'
     })
     .state('signup', {
       url: '/signup',
-      templateUrl: 'templates/signUp.html',
+      templateUrl: 'app/signup/signup.html',
       controller: 'signupController'
     })
     .state('grouplist', {

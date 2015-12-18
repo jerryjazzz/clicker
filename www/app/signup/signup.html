@@ -1,0 +1,26 @@
+<ion-view title="Sign Up">
+    <ion-content padding="false" scroll="false" class="has-header">
+
+        <div class="list list-inset">
+            
+            <span class="input-label">Name</span>
+            <label class="item item-input item-stacked-label">
+                <input type="text" ng-model="userData.name">
+            </label>
+
+            <span class="input-label">Email</span>
+            <label class="item item-input item-stacked-label">
+                <input type="email" ng-model="userData.email">
+            </label>
+
+            <span class="input-label">Password</span>
+            <label class="item item-input item-stacked-label">
+                <input type="password" ng-model="userData.password">
+            </label>
+
+            <button class="button button-positive button-block" ng-click="signup(userData)">Submit</button>
+
+        </div>                    
+
+    </ion-content>
+</ion-view>
