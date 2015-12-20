@@ -1,17 +1,15 @@
 angular.module('app.members', [])
 
-.controller('groupListMemberController', function($scope, $stateParams,
-	$ionicPopup, Users, $ionicActionSheet) {
-
+.controller('groupListMemberController', function($scope, $stateParams,	$ionicPopup, Users, $ionicActionSheet) {
 	var group_key = $stateParams.grp_key;
-
 	$scope.group_name = $stateParams.grp_name;
-
 	$scope.listOfAllGroupMembers = [];
 
-	var groupMemberRef = fb.child("groups").child(group_key).child("group_member");
+	//Firebase references	
+	var groupMembers_GroupKey_Ref = fb.child("group_members").child(group_key);
+	var groupMembers_GrpKey_MemberKey_Ref;
 
-	groupMemberRef.on("value", function(snapshot) {
+	groupMembers_GroupKey_Ref.on("value", function(snapshot) {
 		$scope.listOfAllGroupMembers = [];
 
 		snapshot.forEach(function(childSnapShot) {
@@ -60,9 +58,9 @@ angular.module('app.members', [])
 									var userGroupListRef = fb.child("users").child(user_key).child("group_list").child(childSnapShot.key());
 									userGroupListRef.remove();
 
-									//Remove member from group entity
-									var groupMemberRef = fb.child("groups").child(group_key).child("group_member").child(member_key);
-									groupMemberRef.remove();
+									//Remove member from group_members entity
+									groupMembers_GrpKey_MemberKey_Ref = groupMembers_GroupKey_Ref.child(member_key);
+									groupMembers_GrpKey_MemberKey_Ref.remove();
 
 									//Deduct member count
 									var groupRef = fb.child("groups").child(group_key);

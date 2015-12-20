@@ -1,6 +1,11 @@
 angular.module('app.controllers', [])
 
 .controller('groupListController', function($scope, Users, $timeout, $ionicPopup, $cordovaBarcodeScanner, $timeout,  $ionicActionSheet) {
+	//Firebase references
+	var groupMembersRef = fb.child("group_members");
+	var groupMembers_GroupKey_Ref;
+
+
 	$scope.$on('$ionicView.enter', function(){
 			console.log(Users.getUserName());
 			$scope.refresh();
@@ -41,8 +46,10 @@ angular.module('app.controllers', [])
 				});
 
 				//To insert group admin as member
-				newGroupRef = fb.child("groups").child(newGroupKey).child("group_member");
-				newGroupRef.push({
+				//newGroupRef = fb.child("groups").child(newGroupKey).child("group_member");
+				//groupMembersRef = fb.child("group_members");
+				var groupMembers_GroupKey_Ref = groupMembersRef.child(newGroupKey);
+				groupMembers_GroupKey_Ref.push({
 					'user_key': user_key,
 					'user_name': user_name,
 					'user_email': user_email,
@@ -352,6 +359,16 @@ angular.module('app.controllers', [])
 	$scope.group_name = $stateParams.grp_name;
 	$scope.grp_key = group_key;
 
+	//Firebase references
+	var groupItemsRef = fb.child("group_items");
+	var groupItems_GroupKey_Ref = fb.child("group_items").child(group_key);
+	var groupItems_GrpKey_ItemKey_Ref;
+	var groupItemVotersRef = fb.child("group_item_voters");
+	var groupItemVoters_ItemKey_Ref;
+	var groupItemVoters_ItmKey_VoterKey_Ref;
+	var groupMembersRef = fb.child("group_members");
+	var groupMembers_GroupKey_Ref = fb.child("group_members").child(group_key);
+
 	$scope.$on('$ionicView.enter', function(){
 		$scope.refreshWithoutTimeout();
 	});
@@ -359,12 +376,11 @@ angular.module('app.controllers', [])
     $scope.refresh = function() {
     	// refresh the groups by retrieving from db
 	    $timeout( function() {
-			allGroupItemsRef = fb.child("groups").child(group_key).child("group_item");
-			allGroupItemsRef.on("value", function(snapshot) {
-				$scope.listOfAllGroupItems = [];
+	    	groupItems_GroupKey_Ref.on("value", function(snapshot) {
+	    		$scope.listOfAllGroupItems = [];
 				snapshot.forEach(function(childSnapShot) {
 					var groupItem = childSnapShot.val();
-
+					groupItem.group_item_key = childSnapShot.key();
 					var checkDupGroupItem = false;
 
 					for(var i=0; i<$scope.listOfAllGroupItems.length; i++) {
@@ -374,21 +390,29 @@ angular.module('app.controllers', [])
 
 					if(!checkDupGroupItem) {
 						groupItem.voted = false;
+						groupItem.voters = [];
 
-						angular.forEach(groupItem.voters, function(voter, key) {
-						  if(user_email == voter.email) {
-						  	groupItem.voted = true;
-						  }
+						groupItemVotersRef.child(groupItem.group_item_key).on("value", function(snapshot) {
+							snapshot.forEach(function(childSnapShot) {
+								var voter = childSnapShot.val();
+								var voterKey = childSnapShot.key();
+								groupItem.voters.push({
+									voter_key: voterKey,
+									voter_email: voter.email
+								});
+
+								if(voter.email == user_email) {
+									groupItem.voted = true;
+								}
+							});
+							$scope.listOfAllGroupItems.push(groupItem);
 						});
-
-						$scope.listOfAllGroupItems.push(groupItem);
 					}
 
 					//Stop the ion-refresher from spinning
 					$scope.$broadcast('scroll.refreshComplete');
 				});
-
-	        }, function (errorObject) {
+	    	}, function (errorObject) {
 	        console.log("The read failed: " + errorObject.code);
 	      });
 	    }, 500);
@@ -396,12 +420,11 @@ angular.module('app.controllers', [])
 
     $scope.refreshWithoutTimeout = function() {
     	// refresh the groups by retrieving from db
-		allGroupItemsRef = fb.child("groups").child(group_key).child("group_item");
-		allGroupItemsRef.on("value", function(snapshot) {
+		groupItems_GroupKey_Ref.on("value", function(snapshot) {
 			$scope.listOfAllGroupItems = [];
 			snapshot.forEach(function(childSnapShot) {
 				var groupItem = childSnapShot.val();
-
+				groupItem.group_item_key = childSnapShot.key();
 				var checkDupGroupItem = false;
 
 				for(var i=0; i<$scope.listOfAllGroupItems.length; i++) {
@@ -413,27 +436,31 @@ angular.module('app.controllers', [])
 					//Hard code voted to false at first
 					//This voted property is not saved in Firebase and it will be populated differently for each user
 					groupItem.voted = false;
+					groupItem.voters = [];
 
-					angular.forEach(groupItem.voters, function(voter, key) {
-					  if(user_email == voter.email) {
-					  	groupItem.voted = true;
-					  }
+					groupItemVotersRef.child(groupItem.group_item_key).on("value", function(snapshot) {
+						snapshot.forEach(function(childSnapShot) {
+							var voter = childSnapShot.val();
+							var voterKey = childSnapShot.key();
+							groupItem.voters.push({
+								voter_key: voterKey,
+								voter_email: voter.email
+							});
+
+							if(voter.email == user_email) {
+								groupItem.voted = true;
+							}
+						});
+						$scope.listOfAllGroupItems.push(groupItem);
 					});
-
-					$scope.listOfAllGroupItems.push(groupItem);
 				}
 
 				//Stop the ion-refresher from spinning
 				$scope.$broadcast('scroll.refreshComplete');
 			});
-
-
-    	//$scope.listOfAllGroupItems = snapshot.val();
-		//$scope.$broadcast('scroll.refreshComplete');
-
-        }, function (errorObject) {
-        console.log("The read failed: " + errorObject.code);
-      });
+	    }, function (errorObject) {
+	    	console.log("The read failed: " + errorObject.code);
+	  	});
     };
 
 	$scope.addNewItem = function() {
@@ -471,22 +498,11 @@ angular.module('app.controllers', [])
 		myPopup.then(function(item) {
 			if(item) {
 				if(item.name) {
-					//To save the new item
-					groupRef = fb.child("groups").child(group_key).child("group_item");
-
-					groupRef = groupRef.push({
+					//To save the new item	
+					groupItems_GroupKey_Ref.push({
 						name: item.name,
 						author: user_name,
 						votes: 0
-					});
-
-					//Get the unique key created by push method
-					var newGroupItemKey = groupRef.key();
-
-					//To insert the newly generated unique key to the group entity
-					groupRef = fb.child("groups").child(group_key).child("group_item").child(newGroupItemKey);
-					groupRef.update({
-						group_item_key: newGroupItemKey
 					});
 				}
 			}
@@ -494,7 +510,8 @@ angular.module('app.controllers', [])
 	}
 
 	$scope.vote = function(grpItem_key) {
-		var groupItemRef = fb.child("groups").child(group_key).child("group_item").child(grpItem_key);
+		groupItems_GrpKey_ItemKey_Ref = groupItems_GroupKey_Ref.child(grpItem_key);
+		groupItemVoters_ItemKey_Ref = groupItemVotersRef.child(grpItem_key);
 
 		for(var i=0; i<$scope.listOfAllGroupItems.length; i++) {
 			if($scope.listOfAllGroupItems[i].group_item_key == grpItem_key) {
@@ -504,31 +521,29 @@ angular.module('app.controllers', [])
 					$scope.listOfAllGroupItems[i].votes = $scope.listOfAllGroupItems[i].votes - 1;
 
 					//Update the new vote to the Firebase
-					groupItemRef.update({
+					groupItems_GrpKey_ItemKey_Ref.update({
 						votes: $scope.listOfAllGroupItems[i].votes
 					});
 
 					//If the user has already voted, it will be removed from the firebase
 					angular.forEach($scope.listOfAllGroupItems[i].voters, function(voter, key) {
-					  if(user_email == voter.email) {
-  							groupItemRef = fb.child("groups").child(group_key).child("group_item").child(grpItem_key).child("voters").child(key);
-							groupItemRef.remove();
-					  }
+						if(user_email == voter.voter_email) {
+							groupItemVoters_ItmKey_VoterKey_Ref = groupItemVoters_ItemKey_Ref.child(voter.voter_key);
+							groupItemVoters_ItmKey_VoterKey_Ref.remove();
+						}
 					});
 				}
 				else {
 					//Increase the votes of the selected item by 1 locally
 					$scope.listOfAllGroupItems[i].votes = $scope.listOfAllGroupItems[i].votes + 1;
 					//Update the votes to Firebase
-					groupItemRef.update({
+					groupItems_GrpKey_ItemKey_Ref.update({
 						votes: $scope.listOfAllGroupItems[i].votes
 					});
 
 					//Insert the voter's email for that particular item
-					groupItemRef = fb.child("groups").child(group_key).child("group_item").child(grpItem_key).child("voters");
-					groupItemRef.push({'email': user_email});
+					groupItemVoters_ItemKey_Ref.push({'email': user_email});
 				}
-
 
 				$scope.refreshWithoutTimeout();
 
@@ -596,14 +611,14 @@ angular.module('app.controllers', [])
 						var chk_is_member = false;
 						var group_member_count = 0;
 						var groupRef = fb.child("groups").child(group_key);
-						var groupMemberRef = fb.child("groups").child(group_key).child("group_member");
+						//var groupMemberRef = fb.child("groups").child(group_key).child("group_member");
 						var userGroupRef = fb.child("users").child(user_key).child("group_list");
 
 						//Check if user has already been added to the group
-						groupMemberRef.once("value", function(snapshot) {
+						groupMembersRef.once("value", function(snapshot) {
 							snapshot.forEach(function(childSnapShot) {
 								var member = childSnapShot.val();
-								if(new_member_email == member.email)
+								if(new_member_email == member.user_email)
 									chk_is_member = true;
 							});
 
@@ -618,7 +633,7 @@ angular.module('app.controllers', [])
 										group_member_count: group_member_count + 1
 									});
 
-									groupMemberRef.push({
+									groupMembers_GroupKey_Ref.push({
 										'user_key': user_key,
 										'user_name': user_name,
 										'user_email': new_member_email,
@@ -637,7 +652,6 @@ angular.module('app.controllers', [])
 								$scope.showAlert("This user has already joined this group");
 							}
 						});
-
 					}
 					else {
 						//This clause is for invalid user email / user key the email that he has logged in with
