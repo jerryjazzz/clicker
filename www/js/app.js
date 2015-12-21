@@ -1,12 +1,12 @@
 // Firebase initialization
 // Production FB environment
-//var fb = new Firebase("https://clickerprj.firebaseio.com/");
+// var fb = new Firebase("https://clickerprj.firebaseio.com/");
 // Development FB environment
 var fb = new Firebase("https://clicker-project-dev.firebaseio.com/");
 
 
-angular.module('app', ['ionic', 'app.controllers', 'app.login',
-'app.signup', 'app.members','app.services', 'firebase','monospaced.qrcode','ngCordova'])
+angular.module('app', ['ionic', 'app.login', 'app.signup', 'app.dash',
+  'app.members','app.services', 'firebase','monospaced.qrcode','ngCordova'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -51,13 +51,22 @@ angular.module('app', ['ionic', 'app.controllers', 'app.login',
     })
     .state('grouplist', {
       url: '/grouplist',
-      templateUrl: 'templates/grouplist.html',
+      templateUrl: 'app/dash/dash.html',
       controller: 'groupListController',
       onEnter: function($state, SessionAuth){
         if(!SessionAuth.isLoggedIn()){
            $state.go('login');
         }
       }
+    })
+    .state('group', {
+        url: '/grouplist',
+        templateUrl: 'app/dash/details.html',
+        controller: 'groupController',
+        params: {
+          grp_key: null,
+          grp_name: null
+        }
     })
     .state('grouplistmember', {
       url: '/grouplistmember',
@@ -67,15 +76,6 @@ angular.module('app', ['ionic', 'app.controllers', 'app.login',
         grp_key: null,
         grp_name: null
       }
-    })
-    .state('group', {
-        url: '/grouplist',
-        templateUrl: 'templates/group.html',
-        controller: 'groupController',
-        params: {
-          grp_key: null,
-          grp_name: null
-        }
     });
 
   // if none of the above states are matched, use this as the fallback

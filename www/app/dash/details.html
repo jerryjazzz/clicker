@@ -1,0 +1,86 @@
+<ion-view title="{{group_name}}">
+    <ion-nav-buttons side="right">
+      <button class="button button-icon" ng-click = "openPopover($event)">
+        <i class="icon ion-android-more-horizontal"></i>
+      </button>
+    </ion-nav-buttons>
+
+    <ion-content padding="false" class="has-header">
+        <ion-refresher spinner="ripple" on-refresh="refresh()">
+        </ion-refresher>
+
+<!--         <ion-list ng-repeat="groupItem in listOfAllGroupItems">
+        	<ion-item class="item-icon-left item-icon-right" ng-click="vote(groupItem.group_item_key)">
+            <i ng-class="groupItem.voted ? 'icon ion-ios-heart assertive' : 'icon ion-ios-heart-outline'"></i>
+            <p ng-bind="groupItem.name"></p>
+            <span class="badge badge-balanced" ng-bind="groupItem.votes"></span>
+	        </ion-item>
+    		</ion-list> -->
+        <div class="list card" ng-repeat="groupItem in listOfAllGroupItems">
+
+          <div class="item item-avatar item-icon-right item-text-wrap" ng-click="vote(groupItem.group_item_key)">
+            <img src="">
+            <h2>Ans: {{groupItem.name}}</h2>
+            <p>by {{groupItem.author}}</p>
+            <i ng-class="groupItem.voted ? 'icon ion-android-checkbox-outline balanced' : 'icon ion-android-checkbox-outline-blank'"></i>
+          </div>
+
+          <div class="item item-body">
+            <div class="row">
+              <div class="col col-50 col-offset-25 text-center">
+                <h1 style="color:grey;">
+                  {{groupItem.votes}}
+                  <p>likes</p>
+                </h1>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+<!--         <button class="button button-balanced button-block " ng-click="addNewItem()">New Item</button>
+        <button class="button button-positive button-block " ng-click="invite()" >Invite Friends</button>
+        <button class="button button-energized button-block " ng-click="openModal()">Group Info</button> -->
+    </ion-content>
+</ion-view>
+
+<!-- Pop up modal to create new quote -->
+<script id="group_info.html" type="text/ng-template">
+    <div class="modal">
+
+      <div class="card">
+        <ion-header-bar class="bar-balanced">
+          <h1 class="title">{{group_name}}</h1>
+          <button class="button button-clear button-positive" ng-click="closeModal()">Cancel</button>
+        </ion-header-bar>
+
+        <ion-content>
+          <div class="row responsive-sm">
+            <div class="col"></div>
+            <div class="col text-center">
+              <qrcode version="4" error-correction-level="M" size="150" data="{{grp_key}}"></qrcode>
+            </div>
+            <div class="col"></div>
+          </div>
+          <div class="row responsive-sm">
+            <div class="col"></div>
+              <h4 class="title">Scan QR Code to join {{group_name}} group</h4>
+            <div class="col"></div>
+          </div>
+        </ion-content>
+      </div>
+    </div>
+
+
+</script>
+
+<script id = "popover.html" type = "text/ng-template">
+   <ion-popover-view>
+      <ion-content>
+        <ion-list>
+          <ion-item ng-click="addNewItem()">New Entry</ion-item>
+          <ion-item ng-click="invite()">Invite Friends</ion-item>
+        </ion-list>
+      </ion-content>
+   </ion-popover-view>
+</script>

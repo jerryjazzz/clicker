@@ -5,7 +5,7 @@ angular.module('app.members', [])
 	$scope.group_name = $stateParams.grp_name;
 	$scope.listOfAllGroupMembers = [];
 
-	//Firebase references	
+	//Firebase references
 	var groupMembers_GroupKey_Ref = fb.child("group_members").child(group_key);
 	var groupMembers_GrpKey_MemberKey_Ref;
 

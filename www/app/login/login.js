@@ -27,20 +27,18 @@ angular.module('app.login', [])
 	      email    : userData.email,
 	      password : userData.password
 	    }, function(error, authData) {
-	      if (error)
-				{
+	      if (error) {
 	        $rootScope.hide();
-	        // console.log(error.code);
 	        $scope.loginErrorMessages(error);
-	      }
-				else
-				{
+	      } else {
 	        $rootScope.hide();
-	        // console.log("Authenticated successfully with payload:", authData);
+
 	        // To save the user's email in the factory which will later be used for group filtering
 	        Users.setEmail(userData.email);
+
 	        // Save Firebase user key
 	        Users.setUserKey(authData.uid);
+
 	        // Save Firebase user name
 	        Users.setUserName(authData.uid);
 
@@ -61,23 +59,19 @@ angular.module('app.login', [])
 
 		fb.authWithOAuthPopup("facebook", function(error, authData)
 		{
-		  if (error)
-			{
+		  if (error) {
 		    $rootScope.hide();
-		    // console.log("Login Failed!", error);
 		    $scope.loginErrorMessages(error);
-		  }
-			else
-			{
-		    // console.log("Authenticated successfully with payload:", authData);
-		    // console.log(authData.facebook.accessToken);
+		  } else {
 		    var fb_accToken = authData.facebook.accessToken;
 
 		    // Get data via facebook graph API
-		    $http.get('https://graph.facebook.com/'+ authData.facebook.id +'/friends?fields=id,name,birthday&access_token='+fb_accToken).
-		    then(function(data) {
+		    $http.get('https://graph.facebook.com/' + authData.facebook.id
+					+ '/friends?fields=id,name,birthday&access_token='
+					+ fb_accToken).then(function(data) {
 		      // console.log(data.data.data[0].name);
 		      // Insert user profile into Firebase
+
 		      Users.newUser(authData.uid, authData.facebook.displayName, authData.facebook.email);
 		    }), (function(data) {
 		      console.log("Data Failed: " + data);
@@ -86,9 +80,11 @@ angular.module('app.login', [])
 
 		    // To save the user's email in the factory which will later be used for group filtering
 		    Users.setEmail(authData.facebook.email);
-		    // Save Firebase user key
+
+				// Save Firebase user key
         Users.setUserKey(authData.uid);
-        // Save Firebase user name
+
+				// Save Firebase user name
         Users.setUserName(authData.uid);
 
 		    $rootScope.hide();
@@ -112,21 +108,20 @@ angular.module('app.login', [])
 
 		fb.authWithOAuthPopup("google", function(error, authData)
 		{
-			if (error)
-			{
+			if (error) {
 				$rootScope.hide();
 				$scope.loginErrorMessages(error);
-			}
-			else
-			{
+			} else {
 				console.log("Authenticated successfully with payload:", authData);
 
 				Users.newUser(authData.uid, authData.google.displayName, authData.google.email);
 
 				// To save the user's email in the factory which will later be used for group filtering
 				Users.setEmail(authData.google.email);
+
 				// Save Firebase user key
 				Users.setUserKey(authData.uid);
+
 				// Save Firebase user name
 				Users.setUserName(authData.uid);
 
@@ -148,22 +143,22 @@ angular.module('app.login', [])
 	{
 		switch (error.code) {
 			case "INVALID_USER":
-				console.log("The specified user account does not exist.");
+				// console.log("The specified user account does not exist.");
 				$rootScope.hide();
 				$rootScope.notify('Error','Email or Password is incorrect!');
 				break;
 			case "INVALID_PASSWORD":
-				console.log("The specified user account password is incorrect.");
+				// console.log("The specified user account password is incorrect.");
 				$rootScope.hide();
 				$rootScope.notify('Error','Email or Password is incorrect!');
 				break;
 			case "NETWORK_ERROR":
-				console.log("Network Error.");
+				// console.log("Network Error.");
 				$rootScope.hide();
 				$rootScope.notify('Error','An error occurred while attempting to contact the authentication server.');
 				break;
 			case "SERVICE_UNAVAILABLE":
-				console.log("Service Unavailable.");
+				// console.log("Service Unavailable.");
 				$rootScope.hide();
 				$rootScope.notify('Error','Service is not available at this moment. Please try again later.');
 				break;
