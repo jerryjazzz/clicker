@@ -27,7 +27,7 @@
         </div>
       </div>
 
-      <div class="item">
+      <div class="item item-text-wrap">
         <div ui-sref="group({grp_key: group.group_key, grp_name: group.group_name})">
           <h1 style="color:grey;">
             Q:
@@ -39,3 +39,36 @@
     </div>
   </ion-content>
 </ion-view>
+
+<!-- Pop up modal to create new clicker topic -->
+<script id="new.html" type="text/ng-template">
+    <div class="modal">
+
+      <div class="card">
+        <ion-header-bar class="bar-stable">
+          <h1 class="title">New</h1>
+          <button class="button button-clear button-positive" ng-click="closeModal()">Cancel</button>
+        </ion-header-bar>
+
+        <ion-content>
+          <div class="list list-inset">
+
+              <span class="input-label">Title:</span>
+              <label class="item item-input item-stacked-label">
+                  <input type="text" ng-model="newGroup.name">
+              </label>
+
+              <div class="spacer text-center" style="height: 10px;"></div>
+
+              <span class="input-label">Description:</span>
+              <label class="item item-input item-stacked-label">
+                  <textarea rows="10" type="text" ng-model="newGroup.description"></textarea>
+              </label>
+
+              <button class="button button-positive button-block" ng-click="save(newGroup)">Submit</button>
+
+          </div>
+        </ion-content>
+      </div>
+    </div>
+</script>

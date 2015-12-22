@@ -1,6 +1,14 @@
 angular.module('app.dash', [])
 
-.controller('groupListController', function($scope, Users, $timeout, $ionicPopup, $cordovaBarcodeScanner, $timeout,  $ionicActionSheet) {
+
+.controller('groupListController', function($scope, Users, $timeout, $ionicPopup,
+	$cordovaBarcodeScanner, $timeout,  $ionicActionSheet, $ionicModal) {
+
+	//Firebase references
+	var groupMembersRef = fb.child("group_members");
+	var groupMembers_GroupKey_Ref;
+
+
 
 	$scope.$on('$ionicView.enter', function(){
 			console.log(Users.getUserName());
@@ -22,6 +30,7 @@ angular.module('app.dash', [])
 
 		// save the group
 		if(group) {
+			$scope.closeModal();
 			if(group.name && group.description) {
 				//Insert the new group in the firebase
 				var user_email = Users.getEmail();
@@ -59,7 +68,12 @@ angular.module('app.dash', [])
 				//To insert the group into users entity
 				userRef = fb.child("users").child(user_key).child("group_list");
 				userRef.push({group_key: newGroupKey});
+<<<<<<< Updated upstream
 
+=======
+				group.name = ""; // clear cache
+				group.description = "";
+>>>>>>> Stashed changes
 				$scope.refresh();
 			}
 		}
@@ -230,41 +244,41 @@ angular.module('app.dash', [])
 		}, 1000);
     };
 
-    $scope.addNewGroup    = function() {
-     	$scope.newGroup = {};
+    // $scope.addNewGroup    = function() {
+    //  	$scope.newGroup = {};
+		//
+ 	// 	var myPopup = $ionicPopup.show({
+		// 	// template: '<input type="text" ng-model="newGroup.name">',
+		// 	template: '<label class="item item-input"><input type="text" placeholder="Enter group name" ng-model="newGroup.name"></label><label class="item item-input"><input type="text" placeholder="Question" ng-model="newGroup.description"></label>',
+		// 	title: 'New',
+		// 	// subTitle: 'Please enter group name',
+		// 	scope: $scope,
+		// 	buttons: [
+		// 		{
+		// 			text: 'Cancel',
+		// 			onTap: function(e) {
+		// 				return false;
+		// 			}
+		// 		},
+		// 		{
+		// 			text: '<b>Save</b>',
+		// 			type: 'button-positive',
+		// 			onTap: function(e) {
+		// 				if (!$scope.newGroup.name || !$scope.newGroup.description) {
+		// 					//don't allow the user to close unless he enters wifi password
+		// 					e.preventDefault();
+		// 				} else {
+		// 					return $scope.newGroup;
+		// 				}
+		// 			}
+		// 		}
+		// 	]
+		// });
 
- 		var myPopup = $ionicPopup.show({
-			// template: '<input type="text" ng-model="newGroup.name">',
-			template: '<label class="item item-input"><input type="text" placeholder="Enter group name" ng-model="newGroup.name"></label><label class="item item-input"><input type="text" placeholder="Question" ng-model="newGroup.description"></label>',
-			title: 'New',
-			// subTitle: 'Please enter group name',
-			scope: $scope,
-			buttons: [
-				{
-					text: 'Cancel',
-					onTap: function(e) {
-						return false;
-					}
-				},
-				{
-					text: '<b>Save</b>',
-					type: 'button-positive',
-					onTap: function(e) {
-						if (!$scope.newGroup.name || !$scope.newGroup.description) {
-							//don't allow the user to close unless he enters wifi password
-							e.preventDefault();
-						} else {
-							return $scope.newGroup;
-						}
-					}
-				}
-			]
-		});
-
-     	myPopup.then(function(newGroup) {
-     		$scope.save(newGroup);
-		});
-    };
+    //  	myPopup.then(function(newGroup) {
+    //  		$scope.save(newGroup);
+		// });
+    // };
 
     // An alert dialog - Saved Sucessfully
     $scope.showAlert = function(message) {
@@ -384,7 +398,7 @@ angular.module('app.dash', [])
 		     	switch (index)
 		     	{
 					case 0 :
-						$scope.addNewGroup();
+						$scope.openModal();
 						return true;
 					case 1 :
 						$scope.enableDelete();
@@ -394,6 +408,21 @@ angular.module('app.dash', [])
 		    }
 		   });
     };
+
+		$ionicModal.fromTemplateUrl('new.html', function(modal) {
+				$scope.newModal = modal;
+		}, {
+				scope: $scope
+		});
+
+		$scope.openModal = function(){
+			$scope.newModal.show();
+		};
+
+		$scope.closeModal = function(){
+			$scope.newModal.hide();
+		};
+
 })
 
 .controller('groupController', function($scope, $stateParams, $ionicModal, $timeout, $ionicPopup, Users, $ionicPopover) {
@@ -719,22 +748,22 @@ angular.module('app.dash', [])
   // handle modal for both create new item and group info
   $scope.openModal = function(){
     $scope.groupInfoModal.show();
-  }
+  };
 
   $scope.closeModal = function(){
     $scope.groupInfoModal.hide();
-  }
+  };
 
-    // An alert dialog - Saved Sucessfully
-    $scope.showAlert = function(message) {
-     var alertPopup = $ionicPopup.alert({
-       title: 'Clicker',
-       template: message
-     });
-     /*alertPopup.then(function(res) {
-       console.log('Saved Successfully');
-     });*/
-    };
+  // An alert dialog - Saved Sucessfully
+  $scope.showAlert = function(message) {
+   var alertPopup = $ionicPopup.alert({
+     title: 'Clicker',
+     template: message
+   });
+   /*alertPopup.then(function(res) {
+     console.log('Saved Successfully');
+   });*/
+  };
 
 
    $ionicPopover.fromTemplateUrl('popover.html', {
