@@ -68,12 +68,10 @@ angular.module('app.dash', [])
 				//To insert the group into users entity
 				userRef = fb.child("users").child(user_key).child("group_list");
 				userRef.push({group_key: newGroupKey});
-<<<<<<< Updated upstream
 
-=======
 				group.name = ""; // clear cache
 				group.description = "";
->>>>>>> Stashed changes
+
 				$scope.refresh();
 			}
 		}
@@ -153,7 +151,7 @@ angular.module('app.dash', [])
 						groupItemsRef_del.remove();
 					});
 
-					
+
 					//Remove group member
 					groupMembersRef_del = fb.child("group_members").child(group_key);
 					groupMembersRef_del.remove();
@@ -225,9 +223,9 @@ angular.module('app.dash', [])
 					  				var group_member = childSnapShot.val();
 					  				group.group_member.push(group_member);
 					  			});
-					  		});		
+					  		});
 
-					  		$scope.listOfAllGroups.push(group);			  		
+					  		$scope.listOfAllGroups.push(group);
 					  	}
 					  }
 					});
