@@ -4,12 +4,6 @@ angular.module('app.dash', [])
 .controller('groupListController', function($scope, Users, $timeout, $ionicPopup,
 	$cordovaBarcodeScanner, $timeout,  $ionicActionSheet, $ionicModal) {
 
-	//Firebase references
-	var groupMembersRef = fb.child("group_members");
-	var groupMembers_GroupKey_Ref;
-
-
-
 	$scope.$on('$ionicView.enter', function(){
 			console.log(Users.getUserName());
 			$scope.refresh();
@@ -68,9 +62,6 @@ angular.module('app.dash', [])
 				//To insert the group into users entity
 				userRef = fb.child("users").child(user_key).child("group_list");
 				userRef.push({group_key: newGroupKey});
-
-				group.name = ""; // clear cache
-				group.description = "";
 
 				$scope.refresh();
 			}
