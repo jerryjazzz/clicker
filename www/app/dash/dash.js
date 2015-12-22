@@ -18,9 +18,10 @@ angular.module('app.dash', [])
 
 	$scope.save   = function(group) {
 		//Firebase references
-		var groupMembersRef;
-		var groupsRef;
-		var usersRef;
+		var groupMembersRef_ins;
+		var groupsRef_ins;
+		var groupsRef_set;
+		var usersRef_ins;
 
 		// save the group
 		if(group) {
@@ -32,8 +33,8 @@ angular.module('app.dash', [])
 				var user_name = Users.getUserName();
 
 				//To push group data to groups entitiy
-				groupsRef = fb.child("groups");
-				groupsRef = groupsRef.push({
+				groupsRef_ins = fb.child("groups");
+				groupsRef_ins = groupsRef_ins.push({
 					group_name: group.name,
 					group_desc: group.description,
 					group_creator: user_email,
@@ -41,18 +42,18 @@ angular.module('app.dash', [])
 				});
 
 				//Get the unique key created by push method
-				var newGroupKey = groupsRef.key();
+				var newGroupKey = groupsRef_ins.key();
 
 				//To insert the newly generated unique key to the groups entity
-				groupsRef = fb.child("groups").child(newGroupKey);
-				groupsRef.update({
+				groupsRef_set = fb.child("groups").child(newGroupKey);
+				groupsRef_set.update({
 					group_key: newGroupKey,
 					group_member_count: 1
 				});
 
 				//To insert group admin as member in group_members entity
-				groupMembersRef = fb.child("group_members").child(newGroupKey);
-				groupMembersRef.push({
+				groupMembersRef_ins = fb.child("group_members").child(newGroupKey);
+				groupMembersRef_ins.push({
 					'user_key': user_key,
 					'user_name': user_name,
 					'user_email': user_email,
@@ -60,8 +61,8 @@ angular.module('app.dash', [])
 				});
 
 				//To insert the group into users entity
-				userRef = fb.child("users").child(user_key).child("group_list");
-				userRef.push({group_key: newGroupKey});
+				usersRef_ins = fb.child("users").child(user_key).child("group_list");
+				usersRef_ins.push({group_key: newGroupKey});
 
 				$scope.refresh();
 			}
@@ -82,9 +83,7 @@ angular.module('app.dash', [])
 		var usersRef_get;
 		var usersRef_del;
 		var groupItemsRef_del;
-		var groupItemsRef_get;
-		var groupMembersRef_del;
-		var groupItemVotersRef_del;
+		var groupMembersRef_del;		
 
 	    var isGroupAdmin = false;
 	    var user_email = Users.getEmail();
@@ -128,20 +127,9 @@ angular.module('app.dash', [])
 						});
 					});
 
-					//Remove group item votes
-					groupItemsRef_get = fb.child("group_items").child(group_key);
-					groupItemsRef_get.once("value", function(snapshot) {
-						snapshot.forEach(function(childSnapShot) {
-							var grp_item_key = childSnapShot.key();
-							groupItemVotersRef_del = fb.child("group_item_voters").child(grp_item_key);
-							groupItemVotersRef_del.remove();
-						});
-
-						//Remove group item
-						groupItemsRef_del = fb.child("group_items").child(group_key);
-						groupItemsRef_del.remove();
-					});
-
+					//Remove group item and voters
+					groupItemsRef_del = fb.child("group_items").child(group_key);
+					groupItemsRef_del.remove();
 
 					//Remove group member
 					groupMembersRef_del = fb.child("group_members").child(group_key);
@@ -164,27 +152,27 @@ angular.module('app.dash', [])
 
     $scope.refresh = function() {
 		//Firebase references
-		var groupsRef;
-		var usersRef;
-		var groupMembersRef;
+		var groupsRef_get;
+		var usersRef_get;
+		var groupMembersRef_get;
 
     	// refresh the groups by retrieving from db
 	    $timeout( function() {
 	    	var user_group_list = [];
 	    	var user_key = Users.getUserKey();
 
-	    	usersRef = fb.child("users").child(user_key).child("group_list");
-	    	groupsRef = fb.child("groups");
+	    	usersRef_get = fb.child("users").child(user_key).child("group_list");
+	    	groupsRef_get = fb.child("groups");
 
 	    	//To get a list of groups that are relevant to the user
-	    	usersRef.on("value", function(snapshot) {
+	    	usersRef_get.on("value", function(snapshot) {
 	    		snapshot.forEach(function(childSnapShot) {
 	    			var userGroup = childSnapShot.val();
 	    			user_group_list.push(userGroup.group_key);
 	    		});
 
 				//To get a list of relevant groups to be shown in dashbaord
-				groupsRef.on("value", function(snapshot) {
+				groupsRef_get.on("value", function(snapshot) {
 					$scope.listOfAllGroups = [];
 					snapshot.forEach(function(childSnapShot) {
 					  var group = childSnapShot.val();
@@ -208,8 +196,8 @@ angular.module('app.dash', [])
 					  	if(chkIsUserGroup) {
 					  		//if this is user's group, get the group members from group_member entity
 					  		group.group_member = [];
-					  		groupMembersRef = fb.child("group_members").child(group.group_key);
-					  		groupMembersRef.on("value", function(snapshot) {
+					  		groupMembersRef_get = fb.child("group_members").child(group.group_key);
+					  		groupMembersRef_get.on("value", function(snapshot) {
 					  			snapshot.forEach(function(childSnapShot) {
 					  				var group_member = childSnapShot.val();
 					  				group.group_member.push(group_member);
@@ -421,24 +409,18 @@ angular.module('app.dash', [])
 	$scope.group_name = $stateParams.grp_name;
 	$scope.grp_key = group_key;
 
-	//Firebase references
-	var groupItemsRef = fb.child("group_items");
-	var groupItems_GroupKey_Ref = fb.child("group_items").child(group_key);
-	var groupItems_GrpKey_ItemKey_Ref;
-	var groupItemVotersRef = fb.child("group_item_voters");
-	var groupItemVoters_ItemKey_Ref;
-	var groupItemVoters_ItmKey_VoterKey_Ref;
-	var groupMembersRef = fb.child("group_members");
-	var groupMembers_GroupKey_Ref = fb.child("group_members").child(group_key);
-
 	$scope.$on('$ionicView.enter', function(){
 		$scope.refreshWithoutTimeout();
 	});
 
     $scope.refresh = function() {
+    	//Firebase references
+    	var groupItemsRef_get;
+
     	// refresh the groups by retrieving from db
 	    $timeout( function() {
-	    	groupItems_GroupKey_Ref.on("value", function(snapshot) {
+	    	groupItemsRef_get = fb.child("group_items").child(group_key);
+	    	groupItemsRef_get.on("value", function(snapshot) {
 	    		$scope.listOfAllGroupItems = [];
 				snapshot.forEach(function(childSnapShot) {
 					var groupItem = childSnapShot.val();
@@ -451,24 +433,16 @@ angular.module('app.dash', [])
 					}
 
 					if(!checkDupGroupItem) {
+						//Hard code voted to false at first
+						//This voted property is not saved in Firebase and it will be populated differently for each user
 						groupItem.voted = false;
-						groupItem.voters = [];
 
-						groupItemVotersRef.child(groupItem.group_item_key).on("value", function(snapshot) {
-							snapshot.forEach(function(childSnapShot) {
-								var voter = childSnapShot.val();
-								var voterKey = childSnapShot.key();
-								groupItem.voters.push({
-									voter_key: voterKey,
-									voter_email: voter.email
-								});
-
-								if(voter.email == user_email) {
-									groupItem.voted = true;
-								}
-							});
-							$scope.listOfAllGroupItems.push(groupItem);
+						angular.forEach(groupItem.voters, function(voter, key) {
+							if(voter.email == user_email)
+								groupItem.voted = true;
 						});
+						
+						$scope.listOfAllGroupItems.push(groupItem);
 					}
 
 					//Stop the ion-refresher from spinning
@@ -481,8 +455,12 @@ angular.module('app.dash', [])
     };
 
     $scope.refreshWithoutTimeout = function() {
+    	//Firebase references
+    	var groupItemsRef_get;
+
     	// refresh the groups by retrieving from db
-		groupItems_GroupKey_Ref.on("value", function(snapshot) {
+		groupItemsRef_get = fb.child("group_items").child(group_key);
+		groupItemsRef_get.on("value", function(snapshot) {
 			$scope.listOfAllGroupItems = [];
 			snapshot.forEach(function(childSnapShot) {
 				var groupItem = childSnapShot.val();
@@ -498,23 +476,13 @@ angular.module('app.dash', [])
 					//Hard code voted to false at first
 					//This voted property is not saved in Firebase and it will be populated differently for each user
 					groupItem.voted = false;
-					groupItem.voters = [];
 
-					groupItemVotersRef.child(groupItem.group_item_key).on("value", function(snapshot) {
-						snapshot.forEach(function(childSnapShot) {
-							var voter = childSnapShot.val();
-							var voterKey = childSnapShot.key();
-							groupItem.voters.push({
-								voter_key: voterKey,
-								voter_email: voter.email
-							});
-
-							if(voter.email == user_email) {
-								groupItem.voted = true;
-							}
-						});
-						$scope.listOfAllGroupItems.push(groupItem);
+					angular.forEach(groupItem.voters, function(voter, key) {
+						if(voter.email == user_email)
+							groupItem.voted = true;
 					});
+					
+					$scope.listOfAllGroupItems.push(groupItem);
 				}
 
 				//Stop the ion-refresher from spinning
@@ -526,6 +494,9 @@ angular.module('app.dash', [])
     };
 
 	$scope.addNewItem = function() {
+		//Firebase references
+		var groupItemsRef_ins;
+
 		$scope.closePopover();
 		$scope.groupItem = {};
 
@@ -561,7 +532,8 @@ angular.module('app.dash', [])
 			if(item) {
 				if(item.name) {
 					//To save the new item
-					groupItems_GroupKey_Ref.push({
+					groupItemsRef_ins = fb.child("group_items").child(group_key);
+					groupItemsRef_ins.push({
 						name: item.name,
 						author: user_name,
 						votes: 0
@@ -572,8 +544,10 @@ angular.module('app.dash', [])
 	}
 
 	$scope.vote = function(grpItem_key) {
-		groupItems_GrpKey_ItemKey_Ref = groupItems_GroupKey_Ref.child(grpItem_key);
-		groupItemVoters_ItemKey_Ref = groupItemVotersRef.child(grpItem_key);
+		//Firebase references
+		var groupItemsRef_ins;
+		var groupItemsRef_set;
+		var groupItemsRef_del;
 
 		for(var i=0; i<$scope.listOfAllGroupItems.length; i++) {
 			if($scope.listOfAllGroupItems[i].group_item_key == grpItem_key) {
@@ -583,28 +557,34 @@ angular.module('app.dash', [])
 					$scope.listOfAllGroupItems[i].votes = $scope.listOfAllGroupItems[i].votes - 1;
 
 					//Update the new vote to the Firebase
-					groupItems_GrpKey_ItemKey_Ref.update({
+					groupItemsRef_set = fb.child("group_items").child(group_key).child(grpItem_key);
+					groupItemsRef_set.update({
 						votes: $scope.listOfAllGroupItems[i].votes
 					});
 
 					//If the user has already voted, it will be removed from the firebase
+					groupItemsRef_del = fb.child("group_items").child(group_key).child(grpItem_key).child("voters");
 					angular.forEach($scope.listOfAllGroupItems[i].voters, function(voter, key) {
-						if(user_email == voter.voter_email) {
-							groupItemVoters_ItmKey_VoterKey_Ref = groupItemVoters_ItemKey_Ref.child(voter.voter_key);
-							groupItemVoters_ItmKey_VoterKey_Ref.remove();
+						if(user_email == voter.email) {
+							groupItemsRef_del = groupItemsRef_del.child(key);
+							groupItemsRef_del.remove();
 						}
 					});
 				}
 				else {
 					//Increase the votes of the selected item by 1 locally
 					$scope.listOfAllGroupItems[i].votes = $scope.listOfAllGroupItems[i].votes + 1;
+					
 					//Update the votes to Firebase
-					groupItems_GrpKey_ItemKey_Ref.update({
+					groupItemsRef_set = fb.child("group_items").child(group_key).child(grpItem_key);
+
+					groupItemsRef_set.update({
 						votes: $scope.listOfAllGroupItems[i].votes
 					});
 
 					//Insert the voter's email for that particular item
-					groupItemVoters_ItemKey_Ref.push({'email': user_email});
+					groupItemsRef_ins = fb.child("group_items").child(group_key).child(grpItem_key).child("voters");
+					groupItemsRef_ins.push({'email': user_email});
 				}
 
 				$scope.refreshWithoutTimeout();
@@ -615,6 +595,13 @@ angular.module('app.dash', [])
 	}
 
 	$scope.invite = function() {
+		//Firebase references
+		var usersRef_get;
+		var usersRef_ins;
+		var groupMembersRef_get;
+		var groupMembersRef_ins;
+		var groupsRef_set;
+
 		$scope.closePopover();
 		$scope.group = {};
 
@@ -651,10 +638,11 @@ angular.module('app.dash', [])
 				var chkValidUser = false;
 				var user_key = "";
 				var user_name = "";
-				var userRef = fb.child("users");
+				//var userRef = fb.child("users");
 
 				//To check if the user is a valid user to be added to the group
-				userRef.once("value", function(snapshot) {
+				usersRef_get = fb.child("users");
+				usersRef_get.once("value", function(snapshot) {
 					if(user_email != new_member_email) {
 						snapshot.forEach(function(childSnapShot) {
 							var user = childSnapShot.val();
@@ -672,12 +660,10 @@ angular.module('app.dash', [])
 					if(chkValidUser) {
 						var chk_is_member = false;
 						var group_member_count = 0;
-						var groupRef = fb.child("groups").child(group_key);
-						//var groupMemberRef = fb.child("groups").child(group_key).child("group_member");
-						var userGroupRef = fb.child("users").child(user_key).child("group_list");
 
 						//Check if user has already been added to the group
-						groupMembersRef.once("value", function(snapshot) {
+						groupMembersRef_get = fb.child("group_members").child(group_key);
+						groupMembersRef_get.once("value", function(snapshot) {
 							snapshot.forEach(function(childSnapShot) {
 								var member = childSnapShot.val();
 								if(new_member_email == member.user_email)
@@ -686,28 +672,32 @@ angular.module('app.dash', [])
 
 							//If user hasn't been added to the group
 							if(!chk_is_member) {
-								// Add the user to the group entity
-								groupRef.once("value", function(snapshot) {
+								// Add the user to the group members entity
+								groupsRef_set = fb.child("groups").child(group_key);
+								groupsRef_set.once("value", function(snapshot) {
 									var group = snapshot.val();
 									group_member_count = group.group_member_count;
 
-									groupRef.update({
+									groupsRef_set.update({
 										group_member_count: group_member_count + 1
 									});
 
-									groupMembers_GroupKey_Ref.push({
+									groupMembersRef_ins = fb.child("group_members").child(group_key);
+									groupMembersRef_ins.push({
 										'user_key': user_key,
 										'user_name': user_name,
 										'user_email': new_member_email,
 										'group_admin': false
 									});
 
-									userGroupRef.push({'group_key': group_key});
+									// Include the group's key in the user entity for dashboard filtering purposes
+									usersRef_ins = fb.child("users").child(user_key).child("group_list");
+									usersRef_ins.push({'group_key': group_key});
 
 									$scope.showAlert("User has been added successfully");
 								});
 
-								// Include the group's key in the user entity for dashboard filtering purposes
+								
 
 							}
 							else {
