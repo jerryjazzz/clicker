@@ -1,6 +1,6 @@
 angular.module('app.members', [])
 
-.controller('groupListMemberController', function($scope, $stateParams,	$ionicPopup, Users, $ionicActionSheet) {
+.controller('groupListMemberController', function($scope, $stateParams,	$ionicPopup, Users, $ionicActionSheet, $cordovaCamera) {
 	var group_key = $stateParams.grp_key;
 	$scope.group_name = $stateParams.grp_name;
 	$scope.listOfAllGroupMembers = [];
@@ -126,43 +126,42 @@ angular.module('app.members', [])
 
 	$scope.takePic = function() {
 		var options =   {
-			quality : 80,
+			quality : 75,
 			destinationType : Camera.DestinationType.DATA_URL,
 			sourceType : Camera.PictureSourceType.CAMERA,
 			allowEdit : true,
-			encodingType: Camera.EncodingType.PNG,
+			encodingType: Camera.EncodingType.JPEG,
 			popoverOptions: CameraPopoverOptions,
-			targetWidth: 500,
-			targetHeight: 300,
+			targetWidth: 150,
+			targetHeight: 150,
 			saveToPhotoAlbum: false
 		};
-		navigator.camera.getPicture(function(DATA_URL) {
-			console.log(DATA_URL);
-			$scope.imgURI= DATA_URL;
-			$scope.$digest();
-		}, function (e) {
-			console.log("On fail " + e);
-		},options);
+
+		$cordovaCamera.getPicture(options).then(function(imageData) {
+			$scope.imgURI = "data:image/jpeg;base64," + imageData;
+		}, function(err) {
+			alert('Error taking photo: ' + err);
+		});
 	};
 
 	$scope.choosefrmGallery = function() {
 		var options =   {
-			quality : 80,
+			quality : 75,
 			destinationType : Camera.DestinationType.DATA_URL,
 			sourceType : Camera.PictureSourceType.PHOTOLIBRARY,
 			allowEdit : true,
-			encodingType: Camera.EncodingType.PNG,
+			encodingType: Camera.EncodingType.JPEG,
 			popoverOptions: CameraPopoverOptions,
-			targetWidth: 500,
-			targetHeight: 300,
+			targetWidth: 150,
+			targetHeight: 150,
 			saveToPhotoAlbum: false
 		};
-		navigator.camera.getPicture(function(DATA_URL) {
-			$scope.imgURI= DATA_URL;
-			$scope.$digest();
-		},function(e) {
-			console.log("On fail " + e);
-		},options);
+
+		$cordovaCamera.getPicture(options).then(function(imageData) {
+			$scope.imgURI = "data:image/jpeg;base64," + imageData;
+		}, function(err) {
+			alert('Error choosing photo: ' + err);
+		});
 	};
 
 	$scope.updateDescription = function() {
