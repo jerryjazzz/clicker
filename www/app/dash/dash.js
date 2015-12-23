@@ -1,6 +1,5 @@
 angular.module('app.dash', [])
 
-
 .controller('groupListController', function($scope, Users, $timeout, $ionicPopup,
 	$cordovaBarcodeScanner, $timeout,  $ionicActionSheet, $ionicModal) {
 
@@ -83,7 +82,7 @@ angular.module('app.dash', [])
 		var usersRef_get;
 		var usersRef_del;
 		var groupItemsRef_del;
-		var groupMembersRef_del;		
+		var groupMembersRef_del;
 
 	    var isGroupAdmin = false;
 	    var user_email = Users.getEmail();
@@ -220,42 +219,6 @@ angular.module('app.dash', [])
 	    	});
 		}, 1000);
     };
-
-    // $scope.addNewGroup    = function() {
-    //  	$scope.newGroup = {};
-		//
- 	// 	var myPopup = $ionicPopup.show({
-		// 	// template: '<input type="text" ng-model="newGroup.name">',
-		// 	template: '<label class="item item-input"><input type="text" placeholder="Enter group name" ng-model="newGroup.name"></label><label class="item item-input"><input type="text" placeholder="Question" ng-model="newGroup.description"></label>',
-		// 	title: 'New',
-		// 	// subTitle: 'Please enter group name',
-		// 	scope: $scope,
-		// 	buttons: [
-		// 		{
-		// 			text: 'Cancel',
-		// 			onTap: function(e) {
-		// 				return false;
-		// 			}
-		// 		},
-		// 		{
-		// 			text: '<b>Save</b>',
-		// 			type: 'button-positive',
-		// 			onTap: function(e) {
-		// 				if (!$scope.newGroup.name || !$scope.newGroup.description) {
-		// 					//don't allow the user to close unless he enters wifi password
-		// 					e.preventDefault();
-		// 				} else {
-		// 					return $scope.newGroup;
-		// 				}
-		// 			}
-		// 		}
-		// 	]
-		// });
-
-    //  	myPopup.then(function(newGroup) {
-    //  		$scope.save(newGroup);
-		// });
-    // };
 
     // An alert dialog - Saved Sucessfully
     $scope.showAlert = function(message) {
@@ -402,7 +365,9 @@ angular.module('app.dash', [])
 
 })
 
-.controller('groupController', function($scope, $stateParams, $ionicModal, $timeout, $ionicPopup, Users, $ionicPopover) {
+.controller('groupController', function($scope, $stateParams, $ionicModal, $timeout,
+	$ionicPopup, Users, $ionicActionSheet) {
+
 	var user_email = Users.getEmail();
 	var user_name = Users.getUserName();
 	var group_key = $stateParams.grp_key;
@@ -441,7 +406,7 @@ angular.module('app.dash', [])
 							if(voter.email == user_email)
 								groupItem.voted = true;
 						});
-						
+
 						$scope.listOfAllGroupItems.push(groupItem);
 					}
 
@@ -481,7 +446,7 @@ angular.module('app.dash', [])
 						if(voter.email == user_email)
 							groupItem.voted = true;
 					});
-					
+
 					$scope.listOfAllGroupItems.push(groupItem);
 				}
 
@@ -497,14 +462,13 @@ angular.module('app.dash', [])
 		//Firebase references
 		var groupItemsRef_ins;
 
-		$scope.closePopover();
 		$scope.groupItem = {};
 
 		// An elaborate, custom popup
 		var myPopup = $ionicPopup.show({
 			template: '<input type="text" ng-model="groupItem.name">',
-			title: 'Add New Item',
-			subTitle: 'Please enter the item',
+			title: 'New Post',
+			subTitle: 'What do you say?',
 			scope: $scope,
 			buttons: [
 				{
@@ -574,7 +538,7 @@ angular.module('app.dash', [])
 				else {
 					//Increase the votes of the selected item by 1 locally
 					$scope.listOfAllGroupItems[i].votes = $scope.listOfAllGroupItems[i].votes + 1;
-					
+
 					//Update the votes to Firebase
 					groupItemsRef_set = fb.child("group_items").child(group_key).child(grpItem_key);
 
@@ -602,7 +566,6 @@ angular.module('app.dash', [])
 		var groupMembersRef_ins;
 		var groupsRef_set;
 
-		$scope.closePopover();
 		$scope.group = {};
 
 		// An elaborate, custom popup
@@ -697,7 +660,7 @@ angular.module('app.dash', [])
 									$scope.showAlert("User has been added successfully");
 								});
 
-								
+
 
 							}
 							else {
@@ -745,33 +708,28 @@ angular.module('app.dash', [])
   };
 
 
-   $ionicPopover.fromTemplateUrl('popover.html', {
-      scope: $scope
-   }).then(function(popover) {
-      $scope.popover = popover;
-   });
-
-   $scope.openPopover = function($event) {
-      $scope.popover.show($event);
-   };
-
-   $scope.closePopover = function() {
-      $scope.popover.hide();
-   };
-
-   //Cleanup the popover when we're done with it!
-   $scope.$on('$destroy', function() {
-      $scope.popover.remove();
-   });
-
-   // Execute action on hide popover
-   $scope.$on('popover.hidden', function() {
-      // Execute action
-   });
-
-   // Execute action on remove popover
-   $scope.$on('popover.removed', function() {
-      // Execute action
-   });
+	$scope.showActionSheet = function (){
+		$ionicActionSheet.show({
+			buttons: [
+				 { text: '<div class="button-block text-center">Create Post</div>' },
+				 { text: '<div class="button-block text-center">Invite Friends</div>'}
+			],
+			cancelText: '<div class="button-block text-center assertive">Cancel</div>',
+			cancel: function() {
+		},
+			buttonClicked: function(index) {
+				switch (index)
+				{
+				case 0 :
+					$scope.addNewItem();
+					return true;
+				case 1 :
+					$scope.invite();
+					return true;
+			}
+			return true;
+			}
+		 });
+	};
 
 })

@@ -1,6 +1,6 @@
 <ion-view title="{{group_name}}">
     <ion-nav-buttons side="right">
-      <button class="button button-icon" ng-click = "openPopover($event)">
+      <button class="button button-icon" ng-click = "showActionSheet()">
         <i class="icon ion-android-more-horizontal"></i>
       </button>
     </ion-nav-buttons>
@@ -9,20 +9,20 @@
         <ion-refresher spinner="ripple" on-refresh="refresh()">
         </ion-refresher>
 
-<!--         <ion-list ng-repeat="groupItem in listOfAllGroupItems">
-        	<ion-item class="item-icon-left item-icon-right" ng-click="vote(groupItem.group_item_key)">
-            <i ng-class="groupItem.voted ? 'icon ion-ios-heart assertive' : 'icon ion-ios-heart-outline'"></i>
-            <p ng-bind="groupItem.name"></p>
-            <span class="badge badge-balanced" ng-bind="groupItem.votes"></span>
-	        </ion-item>
-    		</ion-list> -->
         <div class="list card" ng-repeat="groupItem in listOfAllGroupItems">
 
-          <div class="item item-avatar item-icon-right item-text-wrap" ng-click="vote(groupItem.group_item_key)">
-            <img src="">
-            <h2>Ans: {{groupItem.name}}</h2>
-            <p>by {{groupItem.author}}</p>
-            <i ng-class="groupItem.voted ? 'icon ion-android-checkbox-outline balanced' : 'icon ion-android-checkbox-outline-blank'"></i>
+          <div class="item item-icon-right item-text-wrap" ng-click="vote(groupItem.group_item_key)">
+            <div class="row">
+              <div class="col col-20 text-center">
+                <h1>{{$index + 1}}</h1>
+              </div>
+
+              <div class="col col-80">
+                <h2>{{groupItem.name}}</h2>
+                <p>by {{groupItem.author}}</p>
+                <i ng-class="groupItem.voted ? 'icon ion-android-checkbox-outline balanced' : 'icon ion-android-checkbox-outline-blank'"></i>
+              </div>
+            </div>
           </div>
 
           <div class="item item-body">
@@ -70,15 +70,4 @@
         </ion-content>
       </div>
     </div>
-</script>
-
-<script id = "popover.html" type = "text/ng-template">
-   <ion-popover-view>
-      <ion-content>
-        <ion-list>
-          <ion-item ng-click="addNewItem()">New Entry</ion-item>
-          <ion-item ng-click="invite()">Invite Friends</ion-item>
-        </ion-list>
-      </ion-content>
-   </ion-popover-view>
 </script>
