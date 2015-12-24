@@ -46,8 +46,8 @@ angular.module('app.services', [])
       return JSON.parse(user_email);
     },
     newUser: function(uid, name, email) {
-      var ref = fb.child("users").child(uid);
-      ref.update({
+      var usersRef_set = fb.child("users").child(uid);
+      usersRef_set.update({
         "name": name,
         "email": email
       });
@@ -60,9 +60,9 @@ angular.module('app.services', [])
       return JSON.parse(user_key);
     },
     setUserName: function(user_key) {
-      var userRef = fb.child("users").child(user_key);
+      var usersRef_get = fb.child("users").child(user_key);
 
-      userRef.once("value", function(snapshot) {
+      usersRef_get.once("value", function(snapshot) {
         var user = snapshot.val();
         window.localStorage.setItem("user_name", JSON.stringify(user.name));
       });
@@ -71,14 +71,6 @@ angular.module('app.services', [])
     getUserName: function() {
       var user_name = window.localStorage.getItem("user_name");
       return JSON.parse(user_name);
-    },
-    get: function(chatId) {
-      for (var i = 0; i < chats.length; i++) {
-        if (chats[i].id === parseInt(chatId)) {
-          return chats[i];
-        }
-      }
-      return null;
     }
   };
 })

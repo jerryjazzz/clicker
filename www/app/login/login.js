@@ -43,9 +43,9 @@ angular.module('app.login', [])
 	        Users.setUserName(authData.uid);
 
 	      	// disable back button
-          $ionicHistory.nextViewOptions({
-						disableBack: true
-					});
+			$ionicHistory.nextViewOptions({
+				disableBack: true
+			});
 
 	        $state.go("grouplist");
 	      }
@@ -63,10 +63,10 @@ angular.module('app.login', [])
 		    $rootScope.hide();
 		    $scope.loginErrorMessages(error);
 		  } else {
-		    var fb_accToken = authData.facebook.accessToken;
+		    //var fb_accToken = authData.facebook.accessToken;
 
 		    // Get data via facebook graph API
-		    $http.get('https://graph.facebook.com/' + authData.facebook.id
+		    /*$http.get('https://graph.facebook.com/' + authData.facebook.id
 					+ '/friends?fields=id,name,birthday&access_token='
 					+ fb_accToken).then(function(data) {
 		      // console.log(data.data.data[0].name);
@@ -75,24 +75,27 @@ angular.module('app.login', [])
 		      Users.newUser(authData.uid, authData.facebook.displayName, authData.facebook.email);
 		    }), (function(data) {
 		      console.log("Data Failed: " + data);
-		    });
+		    });*/
 		    // End
+
+		    // To insert the user in the user entity
+		    Users.newUser(authData.uid, authData.facebook.displayName, authData.facebook.email);
 
 		    // To save the user's email in the factory which will later be used for group filtering
 		    Users.setEmail(authData.facebook.email);
 
-				// Save Firebase user key
-        Users.setUserKey(authData.uid);
+			// Save Firebase user key
+    		Users.setUserKey(authData.uid);
 
-				// Save Firebase user name
-        Users.setUserName(authData.uid);
+			// Save Firebase user name
+   			Users.setUserName(authData.uid);
 
 		    $rootScope.hide();
 
 		    // disable back button
-        $ionicHistory.nextViewOptions({
-					disableBack: true
-				});
+        	$ionicHistory.nextViewOptions({
+				disableBack: true
+			});
 
         $state.go("grouplist");
 		  }

@@ -4,24 +4,24 @@ angular.module('app.signup', [])
   Users, $ionicHistory) {
 
 	$scope.signup = function(userData)
-  {
+	{
 	    $rootScope.show('Loading...');
 
-	    if(!userData)
-      {
-        $rootScope.notify("Please enter all the credentials");
-  			$rootScope.hide();
-  			return false;
-	    }
+    	if(!userData)
+		{
+			$rootScope.notify("Please enter all the credentials");
+			$rootScope.hide();
+			return false;
+		}
 
-  		var name = userData.name;
-	    var email = userData.email;
-	    var psw = userData.password;
+		var name = userData.name;
+		var email = userData.email;
+		var psw = userData.password;
 
   		if(!name || !email || !psw)
-      {
+		{	
   			$rootScope.hide();
-        $rootScope.notify("Please enter all the credentials");
+      		$rootScope.notify("Please enter all the credentials");
   			return false;
   		}
 
@@ -29,14 +29,13 @@ angular.module('app.signup', [])
 	      email    : userData.email,
 	      password : userData.password
 	    }, function(error, userData) {
-	      if (error)
+      	if (error)
         {
 	        $rootScope.hide();
-	        // console.log("Error creating user:", error);
-	      }
+	        $scope.loginErrorMessages(error);
+      	}
         else
         {
-	        // console.log("Successfully created user account with uid:", userData);
 	        // To insert a new user in Firebase
 	        Users.newUser(userData.uid, name, email);
 
@@ -48,25 +47,24 @@ angular.module('app.signup', [])
 	          if (error)
             {
 	            $rootScope.hide();
-	            // console.log("Login Failed!", error);
-	          }
+            	$scope.loginErrorMessages(error);
+          	}
             else
             {
 	            //To save the user's email in the factory which will later be used for group filtering
 	            Users.setEmail(email);
 	      	  	//Save Firebase user key
   	      	 	Users.setUserKey(userData.uid);
-              // ve Firebase user name
-      				//$scope.setUserName(userData.uid);
-      				Users.setUserName(userData.uid);
+      			// Save Firebase user name
+  				Users.setUserName(userData.uid);
 
 	            $rootScope.hide();
-	            // console.log("Authenticated successfully with payload:", authData);
 
 	            // disable back button
 	            $ionicHistory.nextViewOptions({
-      				 disableBack: true
-      				});
+  					disableBack: true
+  				});
+
 	            $state.go("grouplist");
 	          }
 	        });
@@ -74,4 +72,35 @@ angular.module('app.signup', [])
 	      }
 	    });
 	};
+
+	$scope.loginErrorMessages = function(error)
+	{
+		switch (error.code) {
+			case "INVALID_USER":
+				// console.log("The specified user account does not exist.");
+				$rootScope.hide();
+				$rootScope.notify('Error','Email or Password is incorrect!');
+				break;
+			case "INVALID_PASSWORD":
+				// console.log("The specified user account password is incorrect.");
+				$rootScope.hide();
+				$rootScope.notify('Error','Email or Password is incorrect!');
+				break;
+			case "NETWORK_ERROR":
+				// console.log("Network Error.");
+				$rootScope.hide();
+				$rootScope.notify('Error','An error occurred while attempting to contact the authentication server.');
+				break;
+			case "SERVICE_UNAVAILABLE":
+				// console.log("Service Unavailable.");
+				$rootScope.hide();
+				$rootScope.notify('Error','Service is not available at this moment. Please try again later.');
+				break;
+			default:
+				console.log("Error login to application:", error);
+				$rootScope.hide();
+				$rootScope.notify('Error','Opps! Something went wrong!');
+		}
+	};
+
 })

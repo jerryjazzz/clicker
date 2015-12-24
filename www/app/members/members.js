@@ -6,10 +6,10 @@ angular.module('app.members', [])
 	$scope.listOfAllGroupMembers = [];
 
 	//Firebase references
-	var groupMembers_GroupKey_Ref = fb.child("group_members").child(group_key);
-	var groupMembers_GrpKey_MemberKey_Ref;
-
-	groupMembers_GroupKey_Ref.on("value", function(snapshot) {
+	var groupMembersRef_get;
+	
+	groupMembersRef_get = fb.child("group_members").child(group_key);
+	groupMembersRef_get.on("value", function(snapshot) {
 		$scope.listOfAllGroupMembers = [];
 
 		snapshot.forEach(function(childSnapShot) {
@@ -21,6 +21,10 @@ angular.module('app.members', [])
 	});
 
 	$scope.removeGroupMember = function(member_key, user_key) {
+		//Firebase references
+		var usersRef_del;
+		var groupMembersRef_del;
+
 		var chkIsGroupAdmin = false;
 		var loginUserKey = Users.getUserKey();
 
@@ -55,12 +59,12 @@ angular.module('app.members', [])
 
 								if(group_key == userGroupList.group_key)
 								{
-									var userGroupListRef = fb.child("users").child(user_key).child("group_list").child(childSnapShot.key());
-									userGroupListRef.remove();
+									usersRef_del = fb.child("users").child(user_key).child("group_list").child(childSnapShot.key());
+									usersRef_del.remove();
 
 									//Remove member from group_members entity
-									groupMembers_GrpKey_MemberKey_Ref = groupMembers_GroupKey_Ref.child(member_key);
-									groupMembers_GrpKey_MemberKey_Ref.remove();
+									groupMembersRef_del = fb.child("group_members").child(group_key).child(member_key);
+									groupMembersRef_del.remove();
 
 									//Deduct member count
 									var groupRef = fb.child("groups").child(group_key);
