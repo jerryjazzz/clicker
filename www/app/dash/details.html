@@ -1,7 +1,10 @@
 <ion-view title="{{group_name}}">
     <ion-nav-buttons side="right">
-      <button class="button button-icon" ng-click = "showActionSheet()">
+      <button ng-show="!isRemovable" class="button button-icon" ng-click = "showActionSheet()">
         <i class="icon ion-android-more-horizontal"></i>
+      </button>
+      <button ng-show="isRemovable" class="button button-icon" ng-click = "disableDelete()">
+        Cancel
       </button>
     </ion-nav-buttons>
 
@@ -36,10 +39,12 @@
 
         </div>
 
-        <div class="list card" ng-show="listOfAllGroupItems.length>0" ng-repeat="groupItem in listOfAllGroupItems">
+        <div class="list card" ng-show="(listOfAllGroupItems.length>0)" ng-repeat="groupItem in listOfAllGroupItems">
+          <div class="item item-icon-right item-text-wrap" >
 
-          <div class="item item-icon-right item-text-wrap" ng-click="vote(groupItem.group_item_key)">
-            <div class="row">
+            <div ng-show="isRemovable" class="icon ion-android-remove-circle assertive" ng-click="deletePost()"></div>
+
+            <div class="row" ng-click="vote(groupItem.group_item_key)">
               <div class="col col-20 text-center">
                 <h1>{{$index + 1}}</h1>
               </div>
@@ -47,7 +52,7 @@
               <div class="col col-80">
                 <h2>{{groupItem.name}}</h2>
                 <p>by {{groupItem.author}}</p>
-                <i ng-class="groupItem.voted ? 'icon ion-android-checkbox-outline balanced' : 'icon ion-android-checkbox-outline-blank'"></i>
+                <i ng-show="!isRemovable" ng-class="groupItem.voted ? 'icon ion-android-checkbox-outline balanced' : 'icon ion-android-checkbox-outline-blank'"></i>
               </div>
             </div>
           </div>

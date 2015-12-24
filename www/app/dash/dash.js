@@ -715,9 +715,14 @@ angular.module('app.dash', [])
 				 { text: '<div class="button-block text-center">Create Post</div>' },
 				 { text: '<div class="button-block text-center">Invite Friends</div>'}
 			],
+			destructiveText: '<div class="button-block text-center assertive">Delete</div>',
+			destructiveButtonClicked: function() {
+				$scope.enableDelete();
+				return true;
+      },
 			cancelText: '<div class="button-block text-center assertive">Cancel</div>',
 			cancel: function() {
-		},
+			},
 			buttonClicked: function(index) {
 				switch (index)
 				{
@@ -732,5 +737,17 @@ angular.module('app.dash', [])
 			}
 		 });
 	};
+
+	$scope.enableDelete = function(){
+		$scope.isRemovable = true;
+	};
+
+	$scope.disableDelete = function(){
+		$scope.isRemovable = false;
+	};
+
+	$scope.deletePost = function(){
+		alert('delete post');
+	}
 
 })
