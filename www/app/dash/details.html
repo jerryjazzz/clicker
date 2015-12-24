@@ -9,7 +9,34 @@
         <ion-refresher spinner="ripple" on-refresh="refresh()">
         </ion-refresher>
 
-        <div class="list card" ng-repeat="groupItem in listOfAllGroupItems">
+        <div ng-show="!(listOfAllGroupItems.length>0)">
+
+          <div class="spacer text-center" style="height: 30px;"></div>
+
+          <div class="row">
+            <div class="col col-80 col-offset-10 text-center">
+              <h1 style="color:grey;">
+                Q:
+              </h1>
+              <p style="color:grey;">Show the description of the clicker topic</p>
+            </div>
+          </div>
+
+          <div class="row">
+              <div class="col col-80 col-offset-10 text-center">
+                <p>You have not added any post yet.</p>
+              </div>
+          </div>
+
+          <div class="row">
+            <div class="col col-50 col-offset-25 text-center">
+                <a href="" class="button button-balanced button-block" ng-click="addNewItem()">Create new post</a>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="list card" ng-show="listOfAllGroupItems.length>0" ng-repeat="groupItem in listOfAllGroupItems">
 
           <div class="item item-icon-right item-text-wrap" ng-click="vote(groupItem.group_item_key)">
             <div class="row">

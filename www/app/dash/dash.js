@@ -412,6 +412,7 @@ angular.module('app.dash', [])
 
 					//Stop the ion-refresher from spinning
 					$scope.$broadcast('scroll.refreshComplete');
+
 				});
 	    	}, function (errorObject) {
 	        console.log("The read failed: " + errorObject.code);
