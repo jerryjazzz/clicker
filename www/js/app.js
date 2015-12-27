@@ -74,7 +74,8 @@ angular.module('app', ['ionic', 'app.login', 'app.signup', 'app.dash',
       controller: 'groupListMemberController',
       params: {
         grp_key: null,
-        grp_name: null
+        grp_name: null,
+        grp_desc: null
       }
     });
 

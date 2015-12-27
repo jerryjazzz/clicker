@@ -20,7 +20,7 @@ angular.module('app.dash', [])
 		var groupMembersRef_ins;
 		var groupsRef_ins;
 		var groupsRef_set;
-		var usersRef_ins;
+		var usersRef_set;
 
 		// save the group
 		if(group) {
@@ -37,18 +37,12 @@ angular.module('app.dash', [])
 					group_name: group.name,
 					group_desc: group.description,
 					group_creator: user_email,
+					group_member_count: 1,
 					created_dt: Date.now()
 				});
 
 				//Get the unique key created by push method
 				var newGroupKey = groupsRef_ins.key();
-
-				//To insert the newly generated unique key to the groups entity
-				groupsRef_set = fb.child("groups").child(newGroupKey);
-				groupsRef_set.update({
-					group_key: newGroupKey,
-					group_member_count: 1
-				});
 
 				//To insert group admin as member in group_members entity
 				groupMembersRef_ins = fb.child("group_members").child(newGroupKey);
@@ -60,8 +54,10 @@ angular.module('app.dash', [])
 				});
 
 				//To insert the group into users entity
-				usersRef_ins = fb.child("users").child(user_key).child("group_list");
-				usersRef_ins.push({group_key: newGroupKey});
+				var userGroupListObj = {};
+				userGroupListObj[newGroupKey] = true;
+				usersRef_set = fb.child("users").child(user_key).child("group_list");
+				usersRef_set.update(userGroupListObj);
 
 				$scope.refresh();
 			}
@@ -113,17 +109,8 @@ angular.module('app.dash', [])
 				if(res) {
 					//Remove group from user entity (for all the group members)
 					angular.forEach(all_group_members, function(member, key) {
-						usersRef_get = fb.child("users").child(member.user_key).child("group_list");
-						usersRef_get.once("value", function(snapshot) {
-							//var userGroupList = snapshot.val();
-							snapshot.forEach(function(childSnapShot) {
-								var userGroup = childSnapShot.val();
-								if(userGroup.group_key == group_key) {
-									usersRef_del = fb.child("users").child(member.user_key).child("group_list").child(childSnapShot.key());
-									usersRef_del.remove();
-								}
-							});
-						});
+						usersRef_del = fb.child("users").child(member.user_key).child("group_list").child(group_key);
+						usersRef_del.remove();
 					});
 
 					//Remove group item and voters
@@ -165,16 +152,18 @@ angular.module('app.dash', [])
 
 	    	//To get a list of groups that are relevant to the user
 	    	usersRef_get.on("value", function(snapshot) {
-	    		snapshot.forEach(function(childSnapShot) {
-	    			var userGroup = childSnapShot.val();
-	    			user_group_list.push(userGroup.group_key);
-	    		});
+	    		var userGroupList = snapshot.val();
+
+	    		angular.forEach(userGroupList, function(value, groupKey) {
+					user_group_list.push(groupKey);
+				});
 
 				//To get a list of relevant groups to be shown in dashbaord
 				groupsRef_get.on("value", function(snapshot) {
 					$scope.listOfAllGroups = [];
 					snapshot.forEach(function(childSnapShot) {
 					  var group = childSnapShot.val();
+					  group.group_key = childSnapShot.key();
 					  var checkDupGroup = false;
 					  var chkIsUserGroup = false;
 
@@ -655,8 +644,10 @@ angular.module('app.dash', [])
 									});
 
 									// Include the group's key in the user entity for dashboard filtering purposes
-									usersRef_ins = fb.child("users").child(user_key).child("group_list");
-									usersRef_ins.push({'group_key': group_key});
+									var userGroupListObj = {};
+									userGroupListObj[group_key] = true;
+									usersRef_set = fb.child("users").child(user_key).child("group_list");
+									usersRef_set.update(userGroupListObj);
 
 									$scope.showAlert("User has been added successfully");
 								});
