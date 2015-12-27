@@ -672,6 +672,50 @@ angular.module('app.dash', [])
 
 	};
 
+	$scope.deletePost = function(grpItem_key){
+		//Firebase references
+		var groupMembersRef_get;
+		var groupItemsRef_del;
+
+	    var isGroupAdmin = false;
+	    var user_email = Users.getEmail();
+
+	    groupMembersRef_get = fb.child("group_members").child(group_key);
+	    groupMembersRef_get.once("value", function(snapshot) {
+	    	snapshot.forEach(function(childSnapShot) {
+	    		var group_member = childSnapShot.val();
+
+	    		if(user_email == group_member.user_email) {
+	    			if(group_member.group_admin) {
+	    				isGroupAdmin = true;
+	    			}	
+	    		}
+	    	});
+
+		    if(isGroupAdmin) {
+				// remove post
+				var confirmPopup = $ionicPopup.confirm({
+					title: 'Posts',
+					template: 'Are you sure you want to delete this post?'
+				});
+				confirmPopup.then(function(res) {
+					if(res) {
+						//Remove group item and voters
+						groupItemsRef_del = fb.child("group_items").child(group_key).child(grpItem_key);
+						groupItemsRef_del.remove();
+						//Disable delete button
+						$scope.disableDelete();
+
+						$scope.refreshWithoutTimeout();
+					}
+				});
+		    }
+		    else {
+		    	$scope.showAlert('Opps only admin can delete post!');
+		    }
+	    });
+	}
+
   // show group info
   $ionicModal.fromTemplateUrl('group_info.html', function(modal) {
 	    $scope.groupInfoModal = modal;
@@ -717,13 +761,13 @@ angular.module('app.dash', [])
 			buttonClicked: function(index) {
 				switch (index)
 				{
-				case 0 :
-					$scope.addNewItem();
-					return true;
-				case 1 :
-					$scope.invite();
-					return true;
-			}
+					case 0 :
+						$scope.addNewItem();
+						return true;
+					case 1 :
+						$scope.invite();
+						return true;
+				}
 			return true;
 			}
 		 });
@@ -737,8 +781,6 @@ angular.module('app.dash', [])
 		$scope.isRemovable = false;
 	};
 
-	$scope.deletePost = function(){
-		alert('delete post');
-	}
+	
 
 })

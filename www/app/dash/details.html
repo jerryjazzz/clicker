@@ -42,7 +42,7 @@
         <div class="list card" ng-show="(listOfAllGroupItems.length>0)" ng-repeat="groupItem in listOfAllGroupItems">
           <div class="item item-icon-right item-text-wrap" >
 
-            <div ng-show="isRemovable" class="icon ion-android-remove-circle assertive" ng-click="deletePost()"></div>
+            <div ng-show="isRemovable" class="icon ion-android-remove-circle assertive" ng-click="deletePost(groupItem.group_item_key)"></div>
 
             <div class="row" ng-click="vote(groupItem.group_item_key)">
               <div class="col col-20 text-center">
