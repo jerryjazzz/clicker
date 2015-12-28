@@ -4,6 +4,7 @@ angular.module('app.members', [])
 	var group_key = $stateParams.grp_key;
 	$scope.group_name = $stateParams.grp_name;
 	$scope.group_desc = $stateParams.grp_desc;
+	$scope.group_img = $stateParams.grp_img;
 	$scope.listOfAllGroupMembers = [];
 
 	//Firebase references
@@ -241,6 +242,8 @@ angular.module('app.members', [])
   };
 
 	$scope.takePic = function() {
+		var groupsRef_set;
+
 		var options =   {
 			quality : 75,
 			destinationType : Camera.DestinationType.DATA_URL,
@@ -254,7 +257,14 @@ angular.module('app.members', [])
 		};
 
 		$cordovaCamera.getPicture(options).then(function(imageData) {
-			$scope.imgURI = "data:image/jpeg;base64," + imageData;
+			$scope.group_img = imageData;
+
+			//Save the captured image to the firebase
+			groupsRef_set = fb.child("groups").child(group_key); 
+			groupsRef_set.update({
+				group_img: imageData
+			});
+
 		}, function(err) {
 			alert('Error taking photo: ' + err);
 		});
@@ -274,7 +284,14 @@ angular.module('app.members', [])
 		};
 
 		$cordovaCamera.getPicture(options).then(function(imageData) {
-			$scope.imgURI = "data:image/jpeg;base64," + imageData;
+			$scope.group_img = imageData;
+
+			//Save the captured image to the firebase
+			groupsRef_set = fb.child("groups").child(group_key); 
+			groupsRef_set.update({
+				group_img: imageData
+			});
+
 		}, function(err) {
 			alert('Error choosing photo: ' + err);
 		});

@@ -15,8 +15,8 @@
     <div class="item item-body">
       <div class="row">
         <div class="col col-50 col-offset-25" style="border-radius:10px; border: 2px solid #73AD21; padding: 10px; ">
-          <img class="full-image" src="img\camera.png" ng-if="!imgURI" ng-click="showActionSheet()">
-          <img class="full-image" ng-src="{{imgURI}}" ng-if="imgURI" ng-click="showActionSheet()" >
+          <img class="full-image" src="img\camera.png" ng-if="!group_img" ng-click="showActionSheet()">
+          <img class="full-image" src="data:image/jpeg;base64,{{group_img}}" ng-if="group_img" ng-click="showActionSheet()" >
         </div>
       </div>
       <div class="row">

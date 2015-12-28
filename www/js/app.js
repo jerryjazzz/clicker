@@ -75,7 +75,8 @@ angular.module('app', ['ionic', 'app.login', 'app.signup', 'app.dash',
       params: {
         grp_key: null,
         grp_name: null,
-        grp_desc: null
+        grp_desc: null,
+        grp_img: null
       }
     });
 
