@@ -251,8 +251,8 @@ angular.module('app.members', [])
 			allowEdit : true,
 			encodingType: Camera.EncodingType.JPEG,
 			popoverOptions: CameraPopoverOptions,
-			targetWidth: 150,
-			targetHeight: 150,
+			targetWidth: 500,
+			targetHeight: 500,
 			saveToPhotoAlbum: false
 		};
 
@@ -278,8 +278,8 @@ angular.module('app.members', [])
 			allowEdit : true,
 			encodingType: Camera.EncodingType.JPEG,
 			popoverOptions: CameraPopoverOptions,
-			targetWidth: 150,
-			targetHeight: 150,
+			targetWidth: 500,
+			targetHeight: 500,
 			saveToPhotoAlbum: false
 		};
 
@@ -298,6 +298,50 @@ angular.module('app.members', [])
 	};
 
 	$scope.updateDescription = function() {
-		alert('edit description');
+		//Firebase references
+		var groupsRef_set;
+
+		$scope.new_group_desc = {};
+		$scope.new_group_desc.group_desc = $scope.group_desc;
+
+		// An elaborate, custom popup
+		var myPopup = $ionicPopup.show({
+			template: '<input type="text" ng-model="new_group_desc.group_desc">',
+			title: 'New Topic Description',
+			subTitle: 'Please enter new description',
+			scope: $scope,
+			buttons: [
+				{
+					text: 'Cancel',
+					onTap: function(e) {
+						return false;
+					} 
+				},
+				{
+					text: '<b>Save</b>',
+					type: 'button-positive',
+					onTap: function(e) {
+						if (!$scope.new_group_desc.group_desc) {
+							e.preventDefault();
+						} else {
+							return $scope.new_group_desc.group_desc;
+						}
+					}
+				}
+			]
+		});
+
+		myPopup.then(function(new_group_desc) {
+			if(new_group_desc) {
+				//Reflect the new group desc to the screen
+				$scope.group_desc = new_group_desc;
+
+				//Update it to the firebase
+				groupsRef_set = fb.child("groups").child(group_key);
+				groupsRef_set.update({
+					group_desc: new_group_desc
+				});
+			}
+		});
 	};
 })
