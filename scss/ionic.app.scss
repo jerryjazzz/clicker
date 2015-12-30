@@ -35,7 +35,7 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
      -webkit-align-items: center;
      background-color: #f8f8f8;
 }
- 
+
 .icon-row {
      -webkit-align-items: center;
 }
@@ -43,4 +43,8 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
 // in order to show cancel button in action sheet in android platform
 .platform-android .action-sheet-cancel {
     display: block !important;
+}
+
+.pane {
+  background-color: #f2f2f2
 }

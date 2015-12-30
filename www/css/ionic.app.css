@@ -9107,3 +9107,6 @@ a.button {
 
 .platform-android .action-sheet-cancel {
   display: block !important; }
+
+.pane {
+  background-color: #f2f2f2; }
