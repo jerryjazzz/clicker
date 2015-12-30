@@ -9,6 +9,9 @@
     "installed_plugins": {
         "cordova-plugin-camera": {
             "PACKAGE_NAME": "com.ionicframework.starter"
+        },
+        "cordova-plugin-console": {
+            "PACKAGE_NAME": "com.ionic.clicker"
         }
     },
     "dependent_plugins": {}
