@@ -1,8 +1,8 @@
 // Firebase initialization
 // Production FB environment
-// var fb = new Firebase("https://clickerprj.firebaseio.com/");
+var fb = new Firebase("https://clickerprj.firebaseio.com/");
 // Development FB environment
-var fb = new Firebase("https://clicker-project-dev.firebaseio.com/");
+// var fb = new Firebase("https://clicker-project-dev.firebaseio.com/");
 
 
 angular.module('app', ['ionic', 'app.login', 'app.signup', 'app.dash',
