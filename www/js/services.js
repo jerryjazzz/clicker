@@ -45,11 +45,12 @@ angular.module('app.services', [])
       var user_email = window.localStorage.getItem("user_email");
       return JSON.parse(user_email);
     },
-    newUser: function(uid, name, email) {
+    newUser: function(uid, name, email, provider) {
       var usersRef_set = fb.child("users").child(uid);
       usersRef_set.update({
         "name": name,
-        "email": email
+        "email": email,
+        "provider": provider
       });
     },
     setUserKey: function(user_key) {

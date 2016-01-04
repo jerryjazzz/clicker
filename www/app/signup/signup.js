@@ -1,7 +1,7 @@
 angular.module('app.signup', [])
 
 .controller('signupController', function($scope, $rootScope, $state, Popup,
-  Users, $ionicHistory) {
+  Users, $ionicHistory, $ionicPopup) {
 
 	$scope.signup = function(userData)
 	{
@@ -25,52 +25,71 @@ angular.module('app.signup', [])
   			return false;
   		}
 
-	    fb.createUser({
-	      email    : userData.email,
-	      password : userData.password
-	    }, function(error, userData) {
-      	if (error)
-        {
-	        $rootScope.hide();
-	        $scope.loginErrorMessages(error);
-      	}
-        else
-        {
-	        // To insert a new user in Firebase
-	        Users.newUser(userData.uid, name, email);
+		var duplicatedEmail = false;
 
-	        //Log user into the system
-	        fb.authWithPassword({
-	          email    : email,
-	          password : psw
-	        }, function(error, authData) {
-	          if (error)
-            {
-	            $rootScope.hide();
-            	$scope.loginErrorMessages(error);
-          	}
-            else
-            {
-	            //To save the user's email in the factory which will later be used for group filtering
-	            Users.setEmail(email);
-	      	  	//Save Firebase user key
-  	      	 	Users.setUserKey(userData.uid);
-      			// Save Firebase user name
-  				Users.setUserName(userData.uid);
+		usersRef_get = fb.child("users");
+		usersRef_get.once("value", function(snapshot) {
+			snapshot.forEach(function(childSnapShot) {
+				var user = childSnapShot.val();
+				if(user.email == email) {
+					duplicatedEmail = true;	
+				}
+			});
 
-	            $rootScope.hide();
+			if(duplicatedEmail) {
+				$rootScope.hide();
+				$scope.showAlert("Opps! Email address has already been used");
+			}
+			else {
+				fb.createUser({
+			      email    : userData.email,
+			      password : userData.password
+			    }, function(error, userData) {
+			      	if (error)
+			        {
+				        $rootScope.hide();
+				        $scope.loginErrorMessages(error);
+			      	}
+			        else
+			        {
+				        //Log user into the system
+				        fb.authWithPassword({
+				          email    : email,
+				          password : psw
+				        }, function(error, authData) {
+				          if (error)
+			            {
+				            $rootScope.hide();
+			            	$scope.loginErrorMessages(error);
+			          	}
+			            else
+			            {
 
-	            // disable back button
-	            $ionicHistory.nextViewOptions({
-  					disableBack: true
-  				});
+			            	// To insert a new user in Firebase
+			            	Users.newUser(userData.uid, name, email, authData.provider);
 
-	            $state.go("grouplist");
-	          }
-	        });
-	        // End
-	      }
-	    });
+				            //To save the user's email in the factory which will later be used for group filtering
+				            Users.setEmail(email);
+				      	  	//Save Firebase user key
+			  	      	 	Users.setUserKey(userData.uid);
+			      			// Save Firebase user name
+			  				Users.setUserName(userData.uid);
+
+				            $rootScope.hide();
+
+				            // disable back button
+				            $ionicHistory.nextViewOptions({
+			  					disableBack: true
+			  				});
+
+				            $state.go("grouplist");
+				          }
+				        });
+				        // End
+					}
+			    });
+			}
+		});
 	};
 
 	$scope.loginErrorMessages = function(error)
@@ -102,5 +121,12 @@ angular.module('app.signup', [])
 				$rootScope.notify('Error','Opps! Something went wrong!');
 		}
 	};
+
+	$scope.showAlert = function(message) {
+		var alertPopup = $ionicPopup.alert({
+			title: 'Clicker',
+			template: message
+		});
+    };
 
 })
