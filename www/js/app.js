@@ -1,12 +1,12 @@
 // Firebase initialization
 // Production FB environment
-var fb = new Firebase("https://clickerprj.firebaseio.com/");
+//var fb = new Firebase("https://clickerprj.firebaseio.com/");
 // Development FB environment
-// var fb = new Firebase("https://clicker-project-dev.firebaseio.com/");
+ var fb = new Firebase("https://clicker-project-dev.firebaseio.com/");
 
 
 angular.module('app', ['ionic', 'app.login', 'app.signup', 'app.dash',
-  'app.members','app.services', 'firebase','monospaced.qrcode','ngCordova'])
+  'app.members','app.contact','app.services', 'firebase','monospaced.qrcode','ngCordova'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -77,6 +77,15 @@ angular.module('app', ['ionic', 'app.login', 'app.signup', 'app.dash',
         grp_name: null,
         grp_desc: null,
         grp_img: null
+      }
+    })
+    .state('contact',{
+      url: '/contact',
+      templateUrl: 'app/contact/contact.html',
+      controller: 'contactController',
+      params: {
+        grp_key: null,
+        grp_name: null
       }
     });
 

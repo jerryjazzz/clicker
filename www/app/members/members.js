@@ -2,6 +2,7 @@ angular.module('app.members', [])
 
 .controller('groupListMemberController', function($scope, $stateParams,	$ionicPopup, Users, $ionicActionSheet, $cordovaCamera) {
 	var group_key = $stateParams.grp_key;
+	$scope.grp_key = group_key;
 	$scope.group_name = $stateParams.grp_name;
 	$scope.group_desc = $stateParams.grp_desc;
 	$scope.group_img = $stateParams.grp_img;
@@ -9,7 +10,7 @@ angular.module('app.members', [])
 
 	//Firebase references
 	var groupMembersRef_get;
-	
+
 	groupMembersRef_get = fb.child("group_members").child(group_key);
 	groupMembersRef_get.on("value", function(snapshot) {
 		$scope.listOfAllGroupMembers = [];
@@ -260,7 +261,7 @@ angular.module('app.members', [])
 			$scope.group_img = imageData;
 
 			//Save the captured image to the firebase
-			groupsRef_set = fb.child("groups").child(group_key); 
+			groupsRef_set = fb.child("groups").child(group_key);
 			groupsRef_set.update({
 				group_img: imageData
 			});
@@ -287,7 +288,7 @@ angular.module('app.members', [])
 			$scope.group_img = imageData;
 
 			//Save the captured image to the firebase
-			groupsRef_set = fb.child("groups").child(group_key); 
+			groupsRef_set = fb.child("groups").child(group_key);
 			groupsRef_set.update({
 				group_img: imageData
 			});
@@ -315,7 +316,7 @@ angular.module('app.members', [])
 					text: 'Cancel',
 					onTap: function(e) {
 						return false;
-					} 
+					}
 				},
 				{
 					text: '<b>Save</b>',
