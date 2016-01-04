@@ -10,6 +10,12 @@
         "cordova-plugin-camera": {
             "PACKAGE_NAME": "com.ionic.clicker"
         },
+        "cordova-plugin-console": {
+            "PACKAGE_NAME": "com.ionic.clicker"
+        },
+        "cordova-plugin-contacts": {
+            "PACKAGE_NAME": "com.ionic.clicker"
+        },
         "cordova-plugin-inappbrowser": {
             "PACKAGE_NAME": "com.ionic.clicker"
         },
