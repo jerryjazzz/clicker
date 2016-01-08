@@ -18,12 +18,12 @@
     <ion-refresher spinner="ripple" on-refresh="refresh()">
     </ion-refresher>
 
-    <div class="list card" ng-repeat="group in listOfAllGroups">
+    <div class="list card" ng-repeat="group in listOfAllGroups track by group.group_key">
       <div class="item item-icon-right item-text-wrap" >
         <div ng-show="isRemovable" class="icon ion-android-remove-circle assertive" ng-click="removeGroup(group.group_key)"></div>
         <div ui-sref="grouplistmember({grp_key: group.group_key, grp_name: group.group_name, grp_desc: group.group_desc, grp_img: group.group_img})">
-          <h2>{{group.group_name}}</h2>
-          <p>{{group.group_member_count}} member(s)</p>
+          <h2>{{::group.group_name}}</h2>
+          <p>{{::group.group_member_count}} member(s)</p>
         </div>
       </div>
 
@@ -32,7 +32,7 @@
           <h1 style="color:grey;">
             Q:
           </h1>
-          <h2>{{group.group_desc}}</h2>
+          <h2>{{::group.group_desc}}</h2>
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-<ion-view title="{{group_name}}">
+<ion-view title="{{::group_name}}">
 
   <ion-nav-buttons side="right">
     <!-- <a ui-sref="contact({grp_key: grp_key, grp_name: group_name})"> -->
@@ -31,13 +31,13 @@
   </div>
 
   <div class="card">
-    <ion-list ng-repeat="member in listOfAllGroupMembers">
+    <ion-list ng-repeat="member in listOfAllGroupMembers track by member.member_key">
       <ion-item class="item-icon-right">
         <ion-option-button class="button-assertive" ng-click="removeGroupMember(member.member_key, member.user_key)">
             <i class="ion-minus-circled"></i>
         </ion-option-button>
-        <h2>{{member.user_name}}</h2>
-        <p>{{member.user_email}}</p>
+        <h2>{{::member.user_name}}</h2>
+        <p>{{::member.user_email}}</p>
         <i ng-class="member.group_admin ? 'icon ion-ribbon-b' : ''"></i>
       </ion-item>
     </ion-list>
