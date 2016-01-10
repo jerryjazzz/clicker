@@ -24,6 +24,12 @@
         },
         "phonegap-plugin-barcodescanner": {
             "PACKAGE_NAME": "com.ionic.clicker"
+        },
+        "cordova-plugin-crosswalk-webview": {
+            "PACKAGE_NAME": "com.ionic.clicker"
+        },
+        "cordova-plugin-splashscreen": {
+            "PACKAGE_NAME": "com.ionic.clicker"
         }
     },
     "dependent_plugins": {}
