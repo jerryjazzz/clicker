@@ -5,7 +5,7 @@ angular.module('app.signup', [])
 
 	$scope.signup = function(userData)
 	{
-	    $rootScope.show('Loading...');
+	    $rootScope.show();
 
     	if(!userData)
 		{

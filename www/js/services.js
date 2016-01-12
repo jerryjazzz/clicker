@@ -91,9 +91,9 @@ angular.module('app.services', [])
     });
   };
 
-  $rootScope.show = function (text) {
+  $rootScope.show = function () {
     $rootScope.loading = $ionicLoading.show({
-      template: '<i class="icon ion-looping"></i><br>' + text,
+      template: '<ion-spinner></ion-spinner>',
       animation: 'fade-in',
       showBackdrop: true,
       maxWidth: 200,
@@ -101,7 +101,7 @@ angular.module('app.services', [])
     });
   };
 
-  $rootScope.hide = function (text) {
+  $rootScope.hide = function () {
     $ionicLoading.hide();
   };
 

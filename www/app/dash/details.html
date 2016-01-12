@@ -1,9 +1,9 @@
 <ion-view title="{{::group_name}}">
     <ion-nav-buttons side="right">
-      <button ng-show="!isRemovable" class="button button-icon" ng-click = "showActionSheet()">
+      <button ng-if="!isRemovable" class="button button-icon" ng-click = "showActionSheet()">
         <i class="icon ion-android-more-horizontal"></i>
       </button>
-      <button ng-show="isRemovable" class="button button-icon" ng-click = "disableDelete()">
+      <button ng-if="isRemovable" class="button button-icon" ng-click = "disableDelete()">
         Cancel
       </button>
     </ion-nav-buttons>
@@ -12,8 +12,7 @@
         <ion-refresher spinner="ripple" on-refresh="refresh()">
         </ion-refresher>
 
-        <div ng-show="!(listOfAllGroupItems.length>0)">
-
+        <div ng-if="emptyPost">
           <div class="spacer text-center" style="height: 30px;"></div>
 
           <div class="row">
@@ -39,10 +38,10 @@
 
         </div>
 
-        <div class="list card" ng-show="(listOfAllGroupItems.length>0)" ng-repeat="groupItem in listOfAllGroupItems track by groupItem.group_item_key">
+        <div class="list card" ng-if="!emptyPost" ng-repeat="groupItem in listOfAllGroupItems track by groupItem.group_item_key">
           <div class="item item-icon-right item-text-wrap" >
 
-            <div ng-show="isRemovable" class="icon ion-android-remove-circle assertive" ng-click="deletePost(groupItem.group_item_key)"></div>
+            <div ng-if="isRemovable" class="icon ion-android-remove-circle assertive" ng-click="deletePost(groupItem.group_item_key)"></div>
 
             <div class="row" ng-click="vote(groupItem.group_item_key)">
               <div class="col col-20 text-center">
@@ -52,7 +51,7 @@
               <div class="col col-80">
                 <h2>{{::groupItem.name}}</h2>
                 <p>by {{::groupItem.author}}</p>
-                <i ng-show="!isRemovable" ng-class="groupItem.voted ? 'icon ion-android-checkbox-outline balanced' : 'icon ion-android-checkbox-outline-blank'"></i>
+                <i ng-if="!isRemovable" ng-class="groupItem.voted ? 'icon ion-android-checkbox-outline balanced' : 'icon ion-android-checkbox-outline-blank'"></i>
               </div>
             </div>
           </div>

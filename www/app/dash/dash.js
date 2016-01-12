@@ -1,11 +1,11 @@
 angular.module('app.dash', [])
 
 .controller('groupListController', function($scope, Users, $timeout, $ionicPopup,
-	$cordovaBarcodeScanner, $timeout,  $ionicActionSheet, $ionicModal) {
+	$cordovaBarcodeScanner, $timeout,  $ionicActionSheet, $ionicModal, $rootScope) {
 
-	$scope.$on('$ionicView.enter', function(){
-			console.log(Users.getUserName());
-			$scope.refresh();
+	$scope.$on('$ionicView.loaded', function(){
+		$rootScope.show();
+		$scope.refresh();
 	});
 
 	//Load all the groups from local storage (if any) to improve performance
@@ -201,6 +201,8 @@ angular.module('app.dash', [])
 
 					//Stop the ion-refresher from spinning
 					$scope.$broadcast('scroll.refreshComplete');
+					$rootScope.hide();
+
 				}, function (errorObject) {
 					console.log("The read failed: " + errorObject.code);
 				});
@@ -355,7 +357,9 @@ angular.module('app.dash', [])
 })
 
 .controller('groupController', function($scope, $stateParams, $ionicModal, $timeout,
-	$ionicPopup, Users, $ionicActionSheet) {
+	$ionicPopup, Users, $ionicActionSheet, $rootScope, Popup) {
+
+	$scope.emptyPost = false;
 
 	var user_email = Users.getEmail();
 	var user_name = Users.getUserName();
@@ -363,7 +367,8 @@ angular.module('app.dash', [])
 	$scope.group_name = $stateParams.grp_name;
 	$scope.grp_key = group_key;
 
-	$scope.$on('$ionicView.enter', function(){
+	$scope.$on('$ionicView.loaded', function(){
+		$rootScope.show();
 		$scope.refreshWithoutTimeout();
 	});
 
@@ -440,9 +445,18 @@ angular.module('app.dash', [])
 					$scope.listOfAllGroupItems.push(groupItem);
 				}
 
-				//Stop the ion-refresher from spinning
-				$scope.$broadcast('scroll.refreshComplete');
 			});
+
+			if($scope.listOfAllGroupItems.length <= 0) {
+				$scope.emptyPost = true;
+			}
+			else {
+				$scope.emptyPost = false;
+			}
+
+			//Stop the ion-refresher from spinning
+			$scope.$broadcast('scroll.refreshComplete');
+			$rootScope.hide();
 	    }, function (errorObject) {
 	    	console.log("The read failed: " + errorObject.code);
 	  	});

@@ -6,7 +6,7 @@ angular.module('app.login', [])
 	// Simple login with email
 	$scope.login = function(userData)
 	{
-	    $rootScope.show('Loading...');
+	    $rootScope.show();
 
 	    if(!userData)
 			{
@@ -57,7 +57,7 @@ angular.module('app.login', [])
 	{
 		var usersRef_get;
 
-		$rootScope.show('Loading...');
+		$rootScope.show();
 
 		fb.authWithOAuthPopup("facebook", function(error, authData)
 		{
@@ -132,7 +132,7 @@ angular.module('app.login', [])
 	{
 		var usersRef_get;
 
-		$rootScope.show('Loading...');
+		$rootScope.show();
 
 		fb.authWithOAuthPopup("google", function(error, authData)
 		{
