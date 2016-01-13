@@ -1,7 +1,7 @@
 angular.module('app.dash', [])
 
 .controller('groupListController', function($scope, Users, $timeout, $ionicPopup,
-	$cordovaBarcodeScanner, $timeout,  $ionicActionSheet, $ionicModal, $rootScope) {
+	$cordovaBarcodeScanner, $timeout,  $ionicActionSheet, $ionicModal, Popup, $rootScope) {
 
 	$scope.$on('$ionicView.loaded', function(){
 		$rootScope.show();
@@ -364,8 +364,7 @@ angular.module('app.dash', [])
 	var user_email = Users.getEmail();
 	var user_name = Users.getUserName();
 	var group_key = $stateParams.grp_key;
-	$scope.group_name = $stateParams.grp_name;
-	$scope.grp_key = group_key;
+	$scope.group = {};
 
 	$scope.$on('$ionicView.loaded', function(){
 		$rootScope.show();
@@ -416,7 +415,18 @@ angular.module('app.dash', [])
 
     $scope.refreshWithoutTimeout = function() {
     	//Firebase references
+    	var groupsRef_get;
     	var groupItemsRef_get;
+
+    	// To get group's info which will be used as parameters when user clicks on the header
+    	groupsRef_get = fb.child("groups").child(group_key);
+    	groupsRef_get.on("value", function(snapshot) {
+			$scope.group = {};
+			$scope.group = snapshot.val();
+			$scope.group.group_key = snapshot.key();
+	    }, function (errorObject) {
+	    	console.log("The read failed: " + errorObject.code);
+	  	});
 
     	// refresh the groups by retrieving from db
 		groupItemsRef_get = fb.child("group_items").child(group_key);

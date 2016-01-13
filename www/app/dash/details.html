@@ -1,4 +1,7 @@
-<ion-view title="{{::group_name}}">
+<ion-view>
+    <ion-nav-title>
+      <div class="page-title" ui-sref="grouplistmember({grp_key: group.group_key, grp_name: group.group_name, grp_desc: group.group_desc, grp_img: group.group_img})">{{::group.group_name}}</div>
+    </ion-nav-title>
     <ion-nav-buttons side="right">
       <button ng-if="!isRemovable" class="button button-icon" ng-click = "showActionSheet()">
         <i class="icon ion-android-more-horizontal"></i>
