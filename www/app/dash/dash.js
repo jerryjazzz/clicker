@@ -423,7 +423,8 @@ angular.module('app.dash', [])
     	groupsRef_get.on("value", function(snapshot) {
 			$scope.group = {};
 			$scope.group = snapshot.val();
-			$scope.group.group_key = snapshot.key();
+			if($scope.group)
+				$scope.group.group_key = snapshot.key();
 	    }, function (errorObject) {
 	    	console.log("The read failed: " + errorObject.code);
 	  	});
