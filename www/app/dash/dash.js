@@ -59,6 +59,10 @@ angular.module('app.dash', [])
 				usersRef_set = fb.child("users").child(user_key).child("group_list");
 				usersRef_set.update(userGroupListObj);
 
+				//clear group data for next adding
+				group.name = "";
+				group.description = "";
+
 				$scope.refresh();
 			}
 		}
@@ -713,7 +717,7 @@ angular.module('app.dash', [])
 	    		if(user_email == group_member.user_email) {
 	    			if(group_member.group_admin) {
 	    				isGroupAdmin = true;
-	    			}	
+	    			}
 	    		}
 	    	});
 
@@ -806,6 +810,6 @@ angular.module('app.dash', [])
 		$scope.isRemovable = false;
 	};
 
-	
+
 
 })
