@@ -326,13 +326,12 @@ angular.module('app.dash', [])
 })
 
 .controller('groupController', function($scope, $stateParams, $ionicModal, $timeout,
-	$ionicPopup, Users, $ionicActionSheet, $rootScope, Popup) {
-
-	$scope.emptyPost = false;
-
+	$ionicPopup, Users, $ionicActionSheet, $rootScope, Popup, Group_items, Group_members) {
 	var user_email = Users.getEmail();
 	var user_name = Users.getUserName();
 	var group_key = $stateParams.grp_key;
+	//The emptyPost variable will be used to check if the group has any post, if it doesn't have any, system will ask user to create new post
+	$scope.emptyPost = false;
 	$scope.group = {};
 
 	$scope.$on('$ionicView.loaded', function(){
@@ -352,25 +351,17 @@ angular.module('app.dash', [])
 				snapshot.forEach(function(childSnapShot) {
 					var groupItem = childSnapShot.val();
 					groupItem.group_item_key = childSnapShot.key();
-					var checkDupGroupItem = false;
 
-					for(var i=0; i<$scope.listOfAllGroupItems.length; i++) {
-						if(groupItem.group_item_key == $scope.listOfAllGroupItems[i].group_item_key)
-							checkDupGroupItem = true;
-					}
+					//Hard code voted to false at first
+					//This voted property is not saved in Firebase and it will be populated differently for each user
+					groupItem.voted = false;
 
-					if(!checkDupGroupItem) {
-						//Hard code voted to false at first
-						//This voted property is not saved in Firebase and it will be populated differently for each user
-						groupItem.voted = false;
+					angular.forEach(groupItem.voters, function(voter, key) {
+						if(voter.email == user_email)
+							groupItem.voted = true;
+					});
 
-						angular.forEach(groupItem.voters, function(voter, key) {
-							if(voter.email == user_email)
-								groupItem.voted = true;
-						});
-
-						$scope.listOfAllGroupItems.push(groupItem);
-					}
+					$scope.listOfAllGroupItems.push(groupItem);
 
 					//Stop the ion-refresher from spinning
 					$scope.$broadcast('scroll.refreshComplete');
@@ -398,33 +389,24 @@ angular.module('app.dash', [])
 	    	console.log("The read failed: " + errorObject.code);
 	  	});
 
-    	// refresh the groups by retrieving from db
+    	// refresh the group items by retrieving from db
 		groupItemsRef_get = fb.child("group_items").child(group_key);
 		groupItemsRef_get.on("value", function(snapshot) {
 			$scope.listOfAllGroupItems = [];
 			snapshot.forEach(function(childSnapShot) {
 				var groupItem = childSnapShot.val();
 				groupItem.group_item_key = childSnapShot.key();
-				var checkDupGroupItem = false;
 
-				for(var i=0; i<$scope.listOfAllGroupItems.length; i++) {
-					if(groupItem.group_item_key == $scope.listOfAllGroupItems[i].group_item_key)
-						checkDupGroupItem = true;
-				}
+				//Hard code voted to false at first
+				//This voted property is not saved in Firebase and it will be populated differently for each user
+				groupItem.voted = false;
 
-				if(!checkDupGroupItem) {
-					//Hard code voted to false at first
-					//This voted property is not saved in Firebase and it will be populated differently for each user
-					groupItem.voted = false;
+				angular.forEach(groupItem.voters, function(voter, key) {
+					if(voter.email == user_email)
+						groupItem.voted = true;
+				});
 
-					angular.forEach(groupItem.voters, function(voter, key) {
-						if(voter.email == user_email)
-							groupItem.voted = true;
-					});
-
-					$scope.listOfAllGroupItems.push(groupItem);
-				}
-
+				$scope.listOfAllGroupItems.push(groupItem);
 			});
 
 			if($scope.listOfAllGroupItems.length <= 0) {
@@ -443,9 +425,6 @@ angular.module('app.dash', [])
     };
 
 	$scope.addNewItem = function() {
-		//Firebase references
-		var groupItemsRef_ins;
-
 		$scope.groupItem = {};
 
 		// An elaborate, custom popup
@@ -480,23 +459,13 @@ angular.module('app.dash', [])
 			if(item) {
 				if(item.name) {
 					//To save the new item
-					groupItemsRef_ins = fb.child("group_items").child(group_key);
-					groupItemsRef_ins.push({
-						name: item.name,
-						author: user_name,
-						votes: 0
-					});
+					Group_items.newGroupItem(group_key, item.name, user_name);
 				}
 			}
 		});
 	}
 
 	$scope.vote = function(grpItem_key) {
-		//Firebase references
-		var groupItemsRef_ins;
-		var groupItemsRef_set;
-		var groupItemsRef_del;
-
 		for(var i=0; i<$scope.listOfAllGroupItems.length; i++) {
 			if($scope.listOfAllGroupItems[i].group_item_key == grpItem_key) {
 				//If user has already voted
@@ -505,17 +474,13 @@ angular.module('app.dash', [])
 					$scope.listOfAllGroupItems[i].votes = $scope.listOfAllGroupItems[i].votes - 1;
 
 					//Update the new vote to the Firebase
-					groupItemsRef_set = fb.child("group_items").child(group_key).child(grpItem_key);
-					groupItemsRef_set.update({
-						votes: $scope.listOfAllGroupItems[i].votes
-					});
+					Group_items.updateGroupItemVoteCount(group_key, grpItem_key, $scope.listOfAllGroupItems[i].votes);
 
 					//If the user has already voted, it will be removed from the firebase
-					groupItemsRef_del = fb.child("group_items").child(group_key).child(grpItem_key).child("voters");
+					//This forEach is to get the voter's key within the group_items entity
 					angular.forEach($scope.listOfAllGroupItems[i].voters, function(voter, key) {
 						if(user_email == voter.email) {
-							groupItemsRef_del = groupItemsRef_del.child(key);
-							groupItemsRef_del.remove();
+							Group_items.removeGroupItemVoter(group_key, grpItem_key, key);
 						}
 					});
 				}
@@ -524,15 +489,10 @@ angular.module('app.dash', [])
 					$scope.listOfAllGroupItems[i].votes = $scope.listOfAllGroupItems[i].votes + 1;
 
 					//Update the votes to Firebase
-					groupItemsRef_set = fb.child("group_items").child(group_key).child(grpItem_key);
-
-					groupItemsRef_set.update({
-						votes: $scope.listOfAllGroupItems[i].votes
-					});
+					Group_items.updateGroupItemVoteCount(group_key, grpItem_key, $scope.listOfAllGroupItems[i].votes);
 
 					//Insert the voter's email for that particular item
-					groupItemsRef_ins = fb.child("group_items").child(group_key).child(grpItem_key).child("voters");
-					groupItemsRef_ins.push({'email': user_email});
+					Group_items.newGroupItemVoter(group_key, grpItem_key, user_email);
 				}
 
 				$scope.refreshWithoutTimeout();
@@ -585,8 +545,7 @@ angular.module('app.dash', [])
 				var chkValidUser = false;
 				var user_key = "";
 				var user_name = "";
-				//var userRef = fb.child("users");
-
+				
 				//To check if the user is a valid user to be added to the group
 				usersRef_get = fb.child("users");
 				usersRef_get.once("value", function(snapshot) {
@@ -645,9 +604,6 @@ angular.module('app.dash', [])
 
 									$scope.showAlert("User has been added successfully");
 								});
-
-
-
 							}
 							else {
 								$scope.showAlert("This user has already joined this group");

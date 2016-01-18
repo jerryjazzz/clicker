@@ -138,12 +138,44 @@ angular.module('app.services', [])
 //group_items Factory
 .factory('Group_items', function() {
   return {
+    newGroupItem: function(group_key, item_name, user_name) {
+      var groupItemsRef_ins;
+
+      groupItemsRef_ins = fb.child("group_items").child(group_key);
+      groupItemsRef_ins.push({
+        name: item_name,
+        author: user_name,
+        votes: 0
+      });
+
+    },
     removeAllGroupItems: function(group_key) {
       var groupItemsRef_del;
 
       groupItemsRef_del = fb.child("group_items").child(group_key);
       groupItemsRef_del.remove();
 
+    },
+    newGroupItemVoter: function(group_key, grpItem_key, voter_email) {
+      var groupItemsRef_ins;
+
+      groupItemsRef_ins = fb.child("group_items").child(group_key).child(grpItem_key).child("voters");
+      groupItemsRef_ins.push({'email': voter_email});
+    },
+    updateGroupItemVoteCount: function(group_key, grpItem_key, vote_count) {
+      var groupItemsRef_set;
+
+      groupItemsRef_set = fb.child("group_items").child(group_key).child(grpItem_key);
+      groupItemsRef_set.update({
+        votes: vote_count
+      });
+
+    },
+    removeGroupItemVoter: function(group_key, grpItem_key, voter_key) {
+      var groupItemsRef_set;
+
+      groupItemsRef_del = fb.child("group_items").child(group_key).child(grpItem_key).child("voters").child(voter_key);
+      groupItemsRef_del.remove();
     }
   };
 })
