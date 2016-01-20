@@ -111,7 +111,7 @@ angular.module('app.services', [])
 })
 
 //group_members Factory
-.factory('Group_members', function() {
+.factory('Group_members', function($q) {
   return {
     newGroupMember: function(new_group_key, user_key, user_name, user_email, group_admin) {
       var groupMembersRef_ins;
@@ -131,6 +131,92 @@ angular.module('app.services', [])
 
       groupMembersRef_del = fb.child("group_members").child(group_key);
       groupMembersRef_del.remove();
+    },
+    inviteGroupMember: function(new_member_email, user_email, group_key) {
+      //To create a deffered object
+      var defer = $q.defer();
+
+      //Firebase references
+      var usersRef_get;
+      var groupMembersRef_get;
+      var groupMembersRef_ins;
+      var groupsRef_set;
+
+      var chkValidUser = false;
+      var user_key = "";
+      var user_name = "";
+      
+      //To check if the user is a valid user to be added to the group
+      usersRef_get = fb.child("users");
+      usersRef_get.once("value", function(snapshot) {
+        if(user_email != new_member_email) {
+          snapshot.forEach(function(childSnapShot) {
+            var user = childSnapShot.val();
+
+            //Check if the user entered email is a valid email
+            if(new_member_email == user.email) {
+              user_key = childSnapShot.key();
+              user_name = user.name;
+              chkValidUser = true;
+            }
+          });
+        }
+
+        //If user is a valid user
+        if(chkValidUser) {
+          var chk_is_member = false;
+          var group_member_count = 0;
+
+          //Check if user has already been added to the group
+          groupMembersRef_get = fb.child("group_members").child(group_key);
+          groupMembersRef_get.once("value", function(snapshot) {
+            snapshot.forEach(function(childSnapShot) {
+              var member = childSnapShot.val();
+              if(new_member_email == member.user_email)
+                chk_is_member = true;
+            });
+
+            //If user hasn't been added to the group
+            if(!chk_is_member) {
+              // Add the user to the group members entity
+              groupsRef_set = fb.child("groups").child(group_key);
+              groupsRef_set.once("value", function(snapshot) {
+                var group = snapshot.val();
+                group_member_count = group.group_member_count;
+
+                groupsRef_set.update({
+                  group_member_count: group_member_count + 1
+                });
+
+                groupMembersRef_ins = fb.child("group_members").child(group_key);
+                groupMembersRef_ins.push({
+                  'user_key': user_key,
+                  'user_name': user_name,
+                  'user_email': new_member_email,
+                  'group_admin': false
+                });
+
+                // Include the group's key in the user entity for dashboard filtering purposes
+                var userGroupListObj = {};
+                userGroupListObj[group_key] = true;
+                usersRef_set = fb.child("users").child(user_key).child("group_list");
+                usersRef_set.update(userGroupListObj);
+
+                defer.resolve("User has been added successfully");
+              });
+            }
+            else {
+              defer.resolve("This user has already joined this group");
+            }
+          });
+        }
+        else {
+          //This clause is for invalid user email / user key the email that he has logged in with
+          defer.resolve("Invalid User");
+        }
+      });
+
+      return defer.promise;
     }
   };
 })
@@ -176,7 +262,7 @@ angular.module('app.services', [])
 
       groupItemsRef_del = fb.child("group_items").child(group_key).child(grpItem_key).child("voters").child(voter_key);
       groupItemsRef_del.remove();
-    }
+    }    
   };
 })
 

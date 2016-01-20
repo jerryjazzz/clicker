@@ -510,11 +510,11 @@ angular.module('app.dash', [])
 		var groupMembersRef_ins;
 		var groupsRef_set;
 
-		$scope.group = {};
+		$scope.groupInvite = {};
 
 		// An elaborate, custom popup
 		var myPopup = $ionicPopup.show({
-			template: '<input type="email" ng-model="group.new_member_email">',
+			template: '<input type="email" ng-model="groupInvite.new_member_email">',
 			title: 'Add Group Member',
 			subTitle: 'Please enter e-mail',
 			scope: $scope,
@@ -529,11 +529,11 @@ angular.module('app.dash', [])
 					text: '<b>Save</b>',
 					type: 'button-positive',
 					onTap: function(e) {
-						if (!$scope.group.new_member_email) {
+						if (!$scope.groupInvite.new_member_email) {
 							//don't allow the user to close unless he enters wifi password
 							e.preventDefault();
 						} else {
-							return $scope.group.new_member_email;
+							return $scope.groupInvite.new_member_email;
 						}
 					}
 				}
@@ -542,81 +542,9 @@ angular.module('app.dash', [])
 
 		myPopup.then(function(new_member_email) {
 			if(new_member_email) {
-				var chkValidUser = false;
-				var user_key = "";
-				var user_name = "";
-				
-				//To check if the user is a valid user to be added to the group
-				usersRef_get = fb.child("users");
-				usersRef_get.once("value", function(snapshot) {
-					if(user_email != new_member_email) {
-						snapshot.forEach(function(childSnapShot) {
-							var user = childSnapShot.val();
-
-							//Check if the user entered email is a valid email
-							if(new_member_email == user.email) {
-								user_key = childSnapShot.key();
-								user_name = user.name;
-								chkValidUser = true;
-							}
-						});
-					}
-
-					//If user is a valid user
-					if(chkValidUser) {
-						var chk_is_member = false;
-						var group_member_count = 0;
-
-						//Check if user has already been added to the group
-						groupMembersRef_get = fb.child("group_members").child(group_key);
-						groupMembersRef_get.once("value", function(snapshot) {
-							snapshot.forEach(function(childSnapShot) {
-								var member = childSnapShot.val();
-								if(new_member_email == member.user_email)
-									chk_is_member = true;
-							});
-
-							//If user hasn't been added to the group
-							if(!chk_is_member) {
-								// Add the user to the group members entity
-								groupsRef_set = fb.child("groups").child(group_key);
-								groupsRef_set.once("value", function(snapshot) {
-									var group = snapshot.val();
-									group_member_count = group.group_member_count;
-
-									groupsRef_set.update({
-										group_member_count: group_member_count + 1
-									});
-
-									groupMembersRef_ins = fb.child("group_members").child(group_key);
-									groupMembersRef_ins.push({
-										'user_key': user_key,
-										'user_name': user_name,
-										'user_email': new_member_email,
-										'group_admin': false
-									});
-
-									// Include the group's key in the user entity for dashboard filtering purposes
-									var userGroupListObj = {};
-									userGroupListObj[group_key] = true;
-									usersRef_set = fb.child("users").child(user_key).child("group_list");
-									usersRef_set.update(userGroupListObj);
-
-									$scope.showAlert("User has been added successfully");
-								});
-							}
-							else {
-								$scope.showAlert("This user has already joined this group");
-							}
-						});
-					}
-					else {
-						//This clause is for invalid user email / user key the email that he has logged in with
-						$scope.showAlert("Invalid User");
-					}
-				}, function (errorObject) {
-					console.log("The read failed: " + errorObject.code);
-				});
+				Group_members.inviteGroupMember(new_member_email, user_email, group_key).then(function(message) {
+			      $scope.showAlert(message);
+			    });
 			}
 		});
 
