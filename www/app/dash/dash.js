@@ -503,13 +503,7 @@ angular.module('app.dash', [])
 	}
 
 	$scope.invite = function() {
-		//Firebase references
-		var usersRef_get;
-		var usersRef_ins;
-		var groupMembersRef_get;
-		var groupMembersRef_ins;
-		var groupsRef_set;
-
+		//Object to get user's input
 		$scope.groupInvite = {};
 
 		// An elaborate, custom popup
@@ -551,46 +545,16 @@ angular.module('app.dash', [])
 	};
 
 	$scope.deletePost = function(grpItem_key){
-		//Firebase references
-		var groupMembersRef_get;
-		var groupItemsRef_del;
-
-	    var isGroupAdmin = false;
 	    var user_email = Users.getEmail();
 
-	    groupMembersRef_get = fb.child("group_members").child(group_key);
-	    groupMembersRef_get.once("value", function(snapshot) {
-	    	snapshot.forEach(function(childSnapShot) {
-	    		var group_member = childSnapShot.val();
+	    Group_items.removeGroupItem(user_email, group_key, grpItem_key).then(function(message) {
+	      //Disable delete button
+          $scope.disableDelete();
+          $scope.refreshWithoutTimeout();
 
-	    		if(user_email == group_member.user_email) {
-	    			if(group_member.group_admin) {
-	    				isGroupAdmin = true;
-	    			}
-	    		}
-	    	});
-
-		    if(isGroupAdmin) {
-				// remove post
-				var confirmPopup = $ionicPopup.confirm({
-					title: 'Posts',
-					template: 'Are you sure you want to delete this post?'
-				});
-				confirmPopup.then(function(res) {
-					if(res) {
-						//Remove group item and voters
-						groupItemsRef_del = fb.child("group_items").child(group_key).child(grpItem_key);
-						groupItemsRef_del.remove();
-						//Disable delete button
-						$scope.disableDelete();
-
-						$scope.refreshWithoutTimeout();
-					}
-				});
-		    }
-		    else {
-		    	$scope.showAlert('Opps only admin can delete post!');
-		    }
+	      if(message) {
+	      	$scope.showAlert(message);
+	      }
 	    });
 	}
 
@@ -610,17 +574,13 @@ angular.module('app.dash', [])
     $scope.groupInfoModal.hide();
   };
 
-  // An alert dialog - Saved Sucessfully
-  $scope.showAlert = function(message) {
-   var alertPopup = $ionicPopup.alert({
-     title: 'Clicker',
-     template: message
-   });
-   /*alertPopup.then(function(res) {
-     console.log('Saved Successfully');
-   });*/
-  };
-
+	// An alert dialog - Saved Sucessfully
+	$scope.showAlert = function(message) {
+		var alertPopup = $ionicPopup.alert({
+			title: 'Clicker',
+			template: message
+		});
+	};
 
 	$scope.showActionSheet = function (){
 		$ionicActionSheet.show({
@@ -658,7 +618,5 @@ angular.module('app.dash', [])
 	$scope.disableDelete = function(){
 		$scope.isRemovable = false;
 	};
-
-
 
 })

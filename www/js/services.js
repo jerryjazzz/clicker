@@ -106,12 +106,19 @@ angular.module('app.services', [])
 
       groupsRef_del = fb.child("groups").child(group_key);
       groupsRef_del.remove();
+    },
+    updateGroupMemberCount: function(group_key, group_member_count) {
+      var groupsRef_set = fb.child("groups").child(group_key);
+
+      groupsRef_set.update({
+        group_member_count: group_member_count
+      });
     }
   };
 })
 
 //group_members Factory
-.factory('Group_members', function($q) {
+.factory('Group_members', function($q, Groups, Users) {
   return {
     newGroupMember: function(new_group_key, user_key, user_name, user_email, group_admin) {
       var groupMembersRef_ins;
@@ -184,9 +191,7 @@ angular.module('app.services', [])
                 var group = snapshot.val();
                 group_member_count = group.group_member_count;
 
-                groupsRef_set.update({
-                  group_member_count: group_member_count + 1
-                });
+                Groups.updateGroupMemberCount(group_key, group_member_count + 1);
 
                 groupMembersRef_ins = fb.child("group_members").child(group_key);
                 groupMembersRef_ins.push({
@@ -199,8 +204,7 @@ angular.module('app.services', [])
                 // Include the group's key in the user entity for dashboard filtering purposes
                 var userGroupListObj = {};
                 userGroupListObj[group_key] = true;
-                usersRef_set = fb.child("users").child(user_key).child("group_list");
-                usersRef_set.update(userGroupListObj);
+                Users.updateUserGroup(user_key, userGroupListObj);
 
                 defer.resolve("User has been added successfully");
               });
@@ -222,7 +226,7 @@ angular.module('app.services', [])
 })
 
 //group_items Factory
-.factory('Group_items', function() {
+.factory('Group_items', function($q, $ionicPopup) {
   return {
     newGroupItem: function(group_key, item_name, user_name) {
       var groupItemsRef_ins;
@@ -241,6 +245,51 @@ angular.module('app.services', [])
       groupItemsRef_del = fb.child("group_items").child(group_key);
       groupItemsRef_del.remove();
 
+    },
+    removeGroupItem: function(user_email, group_key, grpItem_key) {
+      //To create a deffered object
+      var defer = $q.defer();
+
+      //Firebase references
+      var groupMembersRef_get;
+      var groupItemsRef_del;
+
+      var isGroupAdmin = false;
+
+      groupMembersRef_get = fb.child("group_members").child(group_key);
+      groupMembersRef_get.once("value", function(snapshot) {
+        snapshot.forEach(function(childSnapShot) {
+          var group_member = childSnapShot.val();
+
+          if(user_email == group_member.user_email) {
+            if(group_member.group_admin) {
+              isGroupAdmin = true;
+            }
+          }
+        });
+
+        if(isGroupAdmin) {
+          // remove post
+          var confirmPopup = $ionicPopup.confirm({
+            title: 'Posts',
+            template: 'Are you sure you want to delete this post?'
+          });
+          confirmPopup.then(function(res) {
+            if(res) {
+              //Remove group item and voters
+              groupItemsRef_del = fb.child("group_items").child(group_key).child(grpItem_key);
+              groupItemsRef_del.remove();
+
+              defer.resolve();
+            }
+          });
+        }
+        else {
+          defer.resolve("Opps only admin can delete post!");
+        }
+      });
+
+      return defer.promise;
     },
     newGroupItemVoter: function(group_key, grpItem_key, voter_email) {
       var groupItemsRef_ins;
