@@ -33,7 +33,7 @@ angular.module('app.services', [])
 })
 
 //Users Factory
-.factory('Users', function() {
+.factory('Users', function($q) {
   return {
     setEmail: function(email) {
       window.localStorage.setItem("user_email", JSON.stringify(email));
@@ -80,6 +80,34 @@ angular.module('app.services', [])
 
       usersRef_del = fb.child("users").child(user_key).child("group_list").child(group_key);
       usersRef_del.remove();
+    },
+    chkLoginEmail: function(login_email, login_provider) {
+      //To create a deffered object
+      var defer = $q.defer();
+
+      var usersRef_get;
+      var duplicatedEmail = false;
+
+      usersRef_get = fb.child("users");
+      usersRef_get.once("value", function(snapshot) {
+        snapshot.forEach(function(childSnapShot) {
+          var user = childSnapShot.val();
+          if(user.email == login_email) {
+            if(user.provider != login_provider || login_provider == "password") {
+              duplicatedEmail = true; 
+            }
+          }
+        });
+
+        if(duplicatedEmail) {
+          defer.reject("Opps! Email address has already been used");
+        }
+        else {
+          defer.resolve();
+        }
+      });
+
+      return defer.promise;
     }
   };
 })

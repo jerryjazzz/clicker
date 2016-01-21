@@ -80,47 +80,32 @@ angular.module('app.login', [])
 		    // End
 
 			//To check the uniqueness of the entered email
-			var duplicatedEmail = false;
+			Users.chkLoginEmail(authData.facebook.email, authData.provider).then(function() {
+				// To insert the user in the user entity
+			    Users.newUser(authData.uid, authData.facebook.displayName, authData.facebook.email, authData.provider);
 
-			usersRef_get = fb.child("users");
-			usersRef_get.once("value", function(snapshot) {
-				snapshot.forEach(function(childSnapShot) {
-					var user = childSnapShot.val();
-					if(user.email == authData.facebook.email) {
-						if(user.provider != authData.provider) {
-							duplicatedEmail = true;	
-						}
-					}
+			    // To save the user's email in the factory which will later be used for group filtering
+			    Users.setEmail(authData.facebook.email);
+
+				// Save Firebase user key
+	    		Users.setUserKey(authData.uid);
+
+				// Save Firebase user name
+	   			Users.setUserName(authData.uid);
+
+			    $rootScope.hide();
+
+			    // disable back button
+	        	$ionicHistory.nextViewOptions({
+					disableBack: true
 				});
 
-				if(duplicatedEmail) {
-					fb.unauth();
-					$rootScope.hide();
-					$scope.showAlert("Opps! Email address has already been used");
-				}
-				else {
-					// To insert the user in the user entity
-				    Users.newUser(authData.uid, authData.facebook.displayName, authData.facebook.email, authData.provider);
-
-				    // To save the user's email in the factory which will later be used for group filtering
-				    Users.setEmail(authData.facebook.email);
-
-					// Save Firebase user key
-		    		Users.setUserKey(authData.uid);
-
-					// Save Firebase user name
-		   			Users.setUserName(authData.uid);
-
-				    $rootScope.hide();
-
-				    // disable back button
-		        	$ionicHistory.nextViewOptions({
-						disableBack: true
-					});
-
-		       		$state.go("grouplist");
-				}
-			});
+	       		$state.go("grouplist");
+		    }, function(message) {
+				fb.unauth();
+				$rootScope.hide();
+				$scope.showAlert(message);
+		    });
 		  }
 		}, {
 		  scope: "email,user_likes,user_friends"
@@ -141,7 +126,33 @@ angular.module('app.login', [])
 				$scope.loginErrorMessages(error);
 			} else {
 				//To check the uniqueness of the entered email
-				var duplicatedEmail = false;
+				Users.chkLoginEmail(authData.google.email, authData.provider).then(function() {
+					Users.newUser(authData.uid, authData.google.displayName, authData.google.email, authData.provider);
+
+					// To save the user's email in the factory which will later be used for group filtering
+					Users.setEmail(authData.google.email);
+
+					// Save Firebase user key
+					Users.setUserKey(authData.uid);
+
+					// Save Firebase user name
+					Users.setUserName(authData.uid);
+
+					$rootScope.hide();
+
+					// disable back button
+					$ionicHistory.nextViewOptions({
+						disableBack: true
+					});
+
+					$state.go("grouplist");
+			    }, function(message) {
+					fb.unauth();
+					$rootScope.hide();
+					$scope.showAlert(message);
+			    });
+
+				/*var duplicatedEmail = false;
 
 				usersRef_get = fb.child("users");
 				usersRef_get.once("value", function(snapshot) {
@@ -180,7 +191,7 @@ angular.module('app.login', [])
 
 						$state.go("grouplist");
 					}
-				});
+				});*/
 			}
 		}, {
 		  scope: "email"

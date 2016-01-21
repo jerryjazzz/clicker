@@ -25,71 +25,58 @@ angular.module('app.signup', [])
   			return false;
   		}
 
-		var duplicatedEmail = false;
+		//To check the uniqueness of the entered email
+		Users.chkLoginEmail(userData.email, "password").then(function() {
+			fb.createUser({
+		      email    : userData.email,
+		      password : userData.password
+		    }, function(error, userData) {
+		      	if (error)
+		        {
+			        $rootScope.hide();
+			        $scope.loginErrorMessages(error);
+		      	}
+		        else
+		        {
+			        //Log user into the system
+			        fb.authWithPassword({
+			          email    : email,
+			          password : psw
+			        }, function(error, authData) {
+			          if (error)
+		            {
+			            $rootScope.hide();
+		            	$scope.loginErrorMessages(error);
+		          	}
+		            else
+		            {
+		            	// To insert a new user in Firebase
+		            	Users.newUser(userData.uid, name, email, authData.provider);
 
-		usersRef_get = fb.child("users");
-		usersRef_get.once("value", function(snapshot) {
-			snapshot.forEach(function(childSnapShot) {
-				var user = childSnapShot.val();
-				if(user.email == email) {
-					duplicatedEmail = true;	
+			            //To save the user's email in the factory which will later be used for group filtering
+			            Users.setEmail(email);
+			      	  	//Save Firebase user key
+		  	      	 	Users.setUserKey(userData.uid);
+		      			// Save Firebase user name
+		  				Users.setUserName(userData.uid);
+
+			            $rootScope.hide();
+
+			            // disable back button
+			            $ionicHistory.nextViewOptions({
+		  					disableBack: true
+		  				});
+
+			            $state.go("grouplist");
+			          }
+			        });
+			        // End
 				}
-			});
-
-			if(duplicatedEmail) {
-				$rootScope.hide();
-				$scope.showAlert("Opps! Email address has already been used");
-			}
-			else {
-				fb.createUser({
-			      email    : userData.email,
-			      password : userData.password
-			    }, function(error, userData) {
-			      	if (error)
-			        {
-				        $rootScope.hide();
-				        $scope.loginErrorMessages(error);
-			      	}
-			        else
-			        {
-				        //Log user into the system
-				        fb.authWithPassword({
-				          email    : email,
-				          password : psw
-				        }, function(error, authData) {
-				          if (error)
-			            {
-				            $rootScope.hide();
-			            	$scope.loginErrorMessages(error);
-			          	}
-			            else
-			            {
-
-			            	// To insert a new user in Firebase
-			            	Users.newUser(userData.uid, name, email, authData.provider);
-
-				            //To save the user's email in the factory which will later be used for group filtering
-				            Users.setEmail(email);
-				      	  	//Save Firebase user key
-			  	      	 	Users.setUserKey(userData.uid);
-			      			// Save Firebase user name
-			  				Users.setUserName(userData.uid);
-
-				            $rootScope.hide();
-
-				            // disable back button
-				            $ionicHistory.nextViewOptions({
-			  					disableBack: true
-			  				});
-
-				            $state.go("grouplist");
-				          }
-				        });
-				        // End
-					}
-			    });
-			}
-		});
+		    });
+	    }, function(message) {
+			$rootScope.hide();
+			$scope.showAlert(message);
+	    });
 	};
 
 	$scope.loginErrorMessages = function(error)
