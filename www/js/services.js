@@ -28,8 +28,6 @@ angular.module('app.services', [])
          //return _user ? true : false;
       }
   }
-
-
 })
 
 //Users Factory
@@ -141,12 +139,28 @@ angular.module('app.services', [])
       groupsRef_set.update({
         group_member_count: group_member_count
       });
+    },
+    updateGroupDescription: function(group_key, new_group_desc) {
+        var groupsRef_set;
+        
+        groupsRef_set = fb.child("groups").child(group_key);
+        groupsRef_set.update({
+          group_desc: new_group_desc
+        });
+    },
+    updateGroupImage: function(group_key, imageData) {
+      var groupsRef_set;
+        
+      groupsRef_set = fb.child("groups").child(group_key);
+      groupsRef_set.update({
+        group_img: imageData
+      });
     }
   };
 })
 
 //group_members Factory
-.factory('Group_members', function($q, Groups, Users) {
+.factory('Group_members', function($q, $ionicPopup, Groups, Users) {
   return {
     newGroupMember: function(new_group_key, user_key, user_name, user_email, group_admin) {
       var groupMembersRef_ins;
@@ -160,6 +174,69 @@ angular.module('app.services', [])
       });
 
       return groupMembersRef_ins;
+    },
+    removeGroupMember: function(member_key, user_key, group_key, listOfAllGroupMembers) {
+      //To create a deffered object
+      var defer = $q.defer();
+
+      //Firebase references
+      var usersRef_del;
+      var groupMembersRef_del;
+      var groupsRef_set;
+
+      var chkIsGroupAdmin = false;
+      var loginUserKey = Users.getUserKey();
+
+      for(var i=0; i<listOfAllGroupMembers.length; i++)
+      {
+        if(loginUserKey == listOfAllGroupMembers[i].user_key)
+        {
+          if(listOfAllGroupMembers[i].group_admin) {
+            chkIsGroupAdmin = true;
+          }
+        }
+      }
+
+      if(chkIsGroupAdmin) {
+        // To check if the user has accidentally deleted him/herself
+        if(loginUserKey != user_key) {
+
+          var confirmPopup = $ionicPopup.confirm({
+            title: 'Clicker',
+            template: 'Are you sure you want to delete this user from the group?'
+          });
+
+          confirmPopup.then(function(confirm) {
+            // If user confirm to drop the user from the group
+            if(confirm)
+            {
+              // Remove group from user entity
+              Users.removeUserGroup(user_key, group_key);
+
+              //Remove member from group_members entity
+              groupMembersRef_del = fb.child("group_members").child(group_key).child(member_key);
+              groupMembersRef_del.remove();
+
+              //Deduct member count
+              groupsRef_set = fb.child("groups").child(group_key);
+              groupsRef_set.once("value", function(snapshot) {
+                var group = snapshot.val();
+
+                Groups.updateGroupMemberCount(group_key, group.group_member_count - 1);
+              });
+            }
+            defer.resolve();
+          });
+        }
+        else {
+          defer.resolve("Invalid Operation");
+        }
+      }
+      else {
+        defer.resolve("Opps! Only group admin is allowed to perform this operation.");
+      }
+
+      return defer.promise;
     },
     removeAllGroupMembers: function(group_key) {
       var groupMembersRef_del;

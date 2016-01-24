@@ -151,47 +151,6 @@ angular.module('app.login', [])
 					$rootScope.hide();
 					$scope.showAlert(message);
 			    });
-
-				/*var duplicatedEmail = false;
-
-				usersRef_get = fb.child("users");
-				usersRef_get.once("value", function(snapshot) {
-					snapshot.forEach(function(childSnapShot) {
-						var user = childSnapShot.val();
-						if(user.email == authData.google.email) {
-							if(user.provider != authData.provider) {
-								duplicatedEmail = true;	
-							}
-						}
-					});
-
-					if(duplicatedEmail) {
-						fb.unauth();
-						$rootScope.hide();
-						$scope.showAlert("Opps! Email address has already been used");
-					}
-					else {
-						Users.newUser(authData.uid, authData.google.displayName, authData.google.email, authData.provider);
-
-						// To save the user's email in the factory which will later be used for group filtering
-						Users.setEmail(authData.google.email);
-
-						// Save Firebase user key
-						Users.setUserKey(authData.uid);
-
-						// Save Firebase user name
-						Users.setUserName(authData.uid);
-
-						$rootScope.hide();
-
-						// disable back button
-						$ionicHistory.nextViewOptions({
-							disableBack: true
-						});
-
-						$state.go("grouplist");
-					}
-				});*/
 			}
 		}, {
 		  scope: "email"
