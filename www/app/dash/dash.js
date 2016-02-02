@@ -2,24 +2,24 @@ angular.module('app.dash', [])
 
 .controller('groupListController', function($scope, Users, $timeout, $ionicPopup,
 	$cordovaBarcodeScanner, $timeout,  $ionicActionSheet, $ionicModal, $rootScope, Groups, Group_members, Group_items, Users, Popup) {
-
-	$scope.$on('$ionicView.loaded', function(){
-		$rootScope.show();
-		$scope.refresh();
-	});
+	//
+	// $scope.$on('$ionicView.loaded', function(){
+	// 	$rootScope.show();
+	// 	$scope.refresh();
+	// });
 
 	//Load all the groups from local storage (if any) to improve performance
-	if (!angular.isUndefined(window.localStorage['dash_group'])){
-		var ls_dashGroup = window.localStorage.getItem("dash_group");
-		$scope.listOfAllGroups = JSON.parse(ls_dashGroup);
-	}
+	// if (!angular.isUndefined(window.localStorage['dash_group'])){
+	// 	var ls_dashGroup = window.localStorage.getItem("dash_group");
+	// 	$scope.listOfAllGroups = JSON.parse(ls_dashGroup);
+	// }
 	//End
 
 	$scope.save = function(group) {
-		// save the group
-		if(group) {
-			$scope.closeModal();
-			if(group.name && group.description) {
+		// if(group)
+		// {
+			if(group.name && group.description)
+			{
 				if(!group.publicPost) {
 					group.publicPost = false;
 				}
@@ -50,7 +50,9 @@ angular.module('app.dash', [])
 
 				$scope.refresh();
 			}
-		}
+
+			$scope.closeModal();
+		// }
 	};
 
 	$scope.enableDelete = function(){
@@ -141,7 +143,7 @@ angular.module('app.dash', [])
 					$scope.listOfAllGroups = [];
 					snapshot.forEach(function(childSnapShot) {
 						var group = childSnapShot.val();
-						
+
 						var chkIsUserGroup = false;
 						group.group_key = childSnapShot.key();
 

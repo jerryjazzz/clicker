@@ -1,19 +1,11 @@
 angular.module('app.services', [])
 
-.factory('BlankFactory', [function(){
-
-}])
-
-.service('BlankService', [function(){
-
-}])
-
 //Authentication Factory
-.factory('Auth', function($firebaseAuth) {
-    var endPoint = "https://clickerprj.firebaseio.com/";
-    var usersRef = new Firebase(endPoint);
-    return $firebaseAuth(usersRef);
-})
+// .factory('Auth', function($firebaseAuth) {
+//     var endPoint = "https://clickerprj.firebaseio.com/";
+//     var usersRef = new Firebase(endPoint);
+//     return $firebaseAuth(usersRef);
+// })
 
 // use session data to login
 .factory('SessionAuth',function(){
@@ -92,7 +84,7 @@ angular.module('app.services', [])
           var user = childSnapShot.val();
           if(user.email == login_email) {
             if(user.provider != login_provider || login_provider == "password") {
-              duplicatedEmail = true; 
+              duplicatedEmail = true;
             }
           }
         });
@@ -143,7 +135,7 @@ angular.module('app.services', [])
     },
     updateGroupDescription: function(group_key, new_group_desc) {
         var groupsRef_set;
-        
+
         groupsRef_set = fb.child("groups").child(group_key);
         groupsRef_set.update({
           group_desc: new_group_desc
@@ -151,7 +143,7 @@ angular.module('app.services', [])
     },
     updateGroupImage: function(group_key, imageData) {
       var groupsRef_set;
-        
+
       groupsRef_set = fb.child("groups").child(group_key);
       groupsRef_set.update({
         group_img: imageData
@@ -270,7 +262,7 @@ angular.module('app.services', [])
             isGroupAdmin = group_member.group_admin;
           }
         });
-       
+
         if(isGroupAdmin) {
           //To check if the user is a valid user to be added to the group
           usersRef_get = fb.child("users");
@@ -341,7 +333,7 @@ angular.module('app.services', [])
         }
         else {
           defer.resolve("Opps! Only group admin is allowed to perform this operation.");
-        }  
+        }
       });
       return defer.promise;
     }
@@ -434,7 +426,7 @@ angular.module('app.services', [])
 
       groupItemsRef_del = fb.child("group_items").child(group_key).child(grpItem_key).child("voters").child(voter_key);
       groupItemsRef_del.remove();
-    }    
+    }
   };
 })
 

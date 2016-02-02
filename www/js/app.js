@@ -1,7 +1,4 @@
-// Firebase initialization
-// Production FB environment
 var fb = new Firebase("https://clickerprj.firebaseio.com/");
-// Development FB environment
 // var fb = new Firebase("https://clicker-project-dev.firebaseio.com/");
 
 
@@ -16,23 +13,6 @@ angular.module('app', ['ionic', 'app.login', 'app.signup', 'app.dash',
     if(window.StatusBar) {
       StatusBar.styleDefault();
     }
-
-    //This code snippet will be used to save user's authentication (one time login)
-    // fb.onAuth(function (authData) {
-    //   if (authData) {
-    //     console.log("Logged in as:", authData);
-    //     /* STORE AUTHDATA */
-    //     //$rootScope.authData = authData;
-    //     //$rootScope.email = $rootScope.authData.password.email;
-    //     //$state.go("tab.dash");
-    //   } else {
-    //     console.log("Not logged in");
-    //     //$rootScope.hide();
-    //     //$state.go("intro");
-    //     //$state.go("login");
-    //   }
-    // });
-
   });
 })
 
@@ -89,7 +69,6 @@ angular.module('app', ['ionic', 'app.login', 'app.signup', 'app.dash',
       }
     });
 
-  // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/grouplist');
 
 });
