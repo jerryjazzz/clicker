@@ -71,9 +71,10 @@ angular.module('app.members', [])
 
 		myPopup.then(function(new_member_email) {
 			if(new_member_email) {
+				var login_user_key = Users.getUserKey();
 				var user_email = Users.getEmail();
 
-				Group_members.inviteGroupMember(new_member_email, user_email, group_key).then(function(message) {
+				Group_members.inviteGroupMember(new_member_email, user_email, group_key, login_user_key).then(function(message) {
 			      $scope.showAlert(message);
 			    });
 			}

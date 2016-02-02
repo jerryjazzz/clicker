@@ -16,13 +16,14 @@ angular.module('app.dash', [])
 	//End
 
 	$scope.save = function(group) {
-		//Firebase references
-		var groupsRef_ins;
-
 		// save the group
 		if(group) {
 			$scope.closeModal();
 			if(group.name && group.description) {
+				if(!group.publicPost) {
+					group.publicPost = false;
+				}
+
 				//Insert the new group in the firebase
 				var user_email = Users.getEmail();
 				var user_key = Users.getUserKey();
@@ -110,7 +111,6 @@ angular.module('app.dash', [])
 	    	$scope.showAlert('Opps only admin can delete group!');
 	    }
 	    $scope.isRemovable = false;
-
     };
 
     $scope.refresh = function() {
@@ -141,6 +141,7 @@ angular.module('app.dash', [])
 					$scope.listOfAllGroups = [];
 					snapshot.forEach(function(childSnapShot) {
 						var group = childSnapShot.val();
+						
 						var chkIsUserGroup = false;
 						group.group_key = childSnapShot.key();
 
@@ -152,6 +153,7 @@ angular.module('app.dash', [])
 							}
 						}
 
+						//Private Groups
 						if(chkIsUserGroup) {
 							//if this is user's group, get the group members from group_member entity
 							group.group_member = [];
@@ -165,7 +167,21 @@ angular.module('app.dash', [])
 
 							$scope.listOfAllGroups.push(group);
 						}
+						//Public Groups
+						else if(group.public_group) {
+							group.group_member = [];
+							groupMembersRef_get = fb.child("group_members").child(group.group_key);
+							groupMembersRef_get.on("value", function(snapshot) {
+								snapshot.forEach(function(childSnapShot) {
+									var group_member = childSnapShot.val();
+									group.group_member.push(group_member);
+								});
+							});
+
+							$scope.listOfAllGroups.push(group);
+						}
 					});
+
 			  		//Copy all the groups to the local storage after refreshed
 					window.localStorage.setItem("dash_group", JSON.stringify($scope.listOfAllGroups));
 
@@ -330,6 +346,7 @@ angular.module('app.dash', [])
 	var user_email = Users.getEmail();
 	var user_name = Users.getUserName();
 	var group_key = $stateParams.grp_key;
+
 	//The emptyPost variable will be used to check if the group has any post, if it doesn't have any, system will ask user to create new post
 	$scope.emptyPost = false;
 	$scope.group = {};
@@ -536,8 +553,10 @@ angular.module('app.dash', [])
 
 		myPopup.then(function(new_member_email) {
 			if(new_member_email) {
-				Group_members.inviteGroupMember(new_member_email, user_email, group_key).then(function(message) {
-			      $scope.showAlert(message);
+				var login_user_key = Users.getUserKey();
+
+		      	Group_members.inviteGroupMember(new_member_email, user_email, group_key, login_user_key).then(function(message) {
+		      		$scope.showAlert(message);
 			    });
 			}
 		});

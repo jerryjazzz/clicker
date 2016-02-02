@@ -51,22 +51,41 @@
         </ion-header-bar>
 
         <ion-content>
-          <div class="list list-inset">
+          <div class="list">
+            <label class="item item-input item-floating-label">
+              <span class="input-label">Title</span>
+              <input type="text" placeholder="Title" ng-model="newGroup.name">
+            </label>
+            <label class="item item-input item-floating-label">
+              <span class="input-label">Description</span>
+              <textarea rows="10" type="text" placeholder="Description" ng-model="newGroup.description"></textarea>
+            </label>
 
-              <span class="input-label">Title:</span>
-              <label class="item item-input item-stacked-label">
-                  <input type="text" ng-model="newGroup.name">
-              </label>
+            <li class="item item-toggle">
+               Public Post
+               <label class="toggle toggle-balanced">
+                 <input type="checkbox" ng-model="newGroup.publicPost">
+                 <div class="track">
+                   <div class="handle"></div>
+                 </div>
+               </label>
+            </li>
+            
+            <button class="button button-positive button-block" ng-click="save(newGroup)">Submit</button>
 
-              <div class="spacer text-center" style="height: 10px;"></div>
+            <!--/*
+            <span class="input-label">Title:</span>
+            <label class="item item-input item-stacked-label">
+                <input type="text" ng-model="newGroup.name">
+            </label>
 
-              <span class="input-label">Description:</span>
-              <label class="item item-input item-stacked-label">
-                  <textarea rows="10" type="text" ng-model="newGroup.description"></textarea>
-              </label>
+            <div class="spacer text-center" style="height: 10px;"></div>
 
-              <button class="button button-positive button-block" ng-click="save(newGroup)">Submit</button>
-
+            <span class="input-label">Description:</span>
+            <label class="item item-input item-stacked-label">
+                <textarea rows="10" type="text" ng-model="newGroup.description"></textarea>
+            </label>
+            */-->
           </div>
         </ion-content>
       </div>
